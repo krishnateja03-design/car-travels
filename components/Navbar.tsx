@@ -2,18 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Car, MessageCircle, Menu, X } from "lucide-react";
+import { MessageCircle, Menu, X } from "lucide-react";
 import { openWhatsApp } from "@/lib/whatsapp";
 import { SITE_CONFIG } from "@/lib/config";
 
 const NAV_LINKS = [
-  { label: "Home",            href: "/" },
-  { label: "Vehicles",        href: "/vehicles" },
-  { label: "Tours & Packages",href: "/tours" },
-  { label: "Gallery",         href: "/gallery" },
-  { label: "About Us",        href: "/about" },
-  { label: "Contact",         href: "/contact" },
+  { label: "Home",             href: "/" },
+  { label: "Our Vehicles",     href: "/vehicles" },
+  { label: "Tours",            href: "/tours" },
+  { label: "Gallery",          href: "/gallery" },
+  { label: "About Us",         href: "/about" },
+  { label: "Contact",          href: "/contact" },
 ];
 
 export default function Navbar() {
@@ -22,7 +23,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -37,34 +38,37 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ── Desktop Nav ── */}
+      {/* ── Top Navigation Bar ── */}
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-[#0D1B3E] shadow-2xl" : "bg-transparent"
+          scrolled ? "bg-white/95 backdrop-blur-md shadow-md py-2.5" : "bg-white py-3.5 shadow-sm"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between gap-6">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0" aria-label="VASU CAR TRAVELS Home">
-            <div className="w-11 h-11 bg-[#C8102E] rounded-xl flex items-center justify-center shrink-0">
-              <Car size={22} className="text-white" strokeWidth={2.5} />
-            </div>
-            <div className="leading-tight">
-              <span className="block text-white font-extrabold text-[17px] tracking-wide">VASU CAR TRAVELS</span>
-              <span className="block text-white/60 text-[11px] tracking-[1.5px] uppercase font-medium">Nellore</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+          {/* Official Company Logo */}
+          <Link href="/" className="flex items-center shrink-0 group" aria-label="VASU CAR TRAVELS Home">
+            <div className="relative w-44 sm:w-52 h-12">
+              <Image
+                src="/logo.png"
+                alt="VASU CAR TRAVELS - Nellore"
+                fill
+                priority
+                className="object-contain object-left group-hover:opacity-95 transition-opacity"
+                sizes="210px"
+              />
             </div>
           </Link>
 
           {/* Desktop links */}
-          <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2" aria-label="Main navigation">
             {NAV_LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                className={`px-3.5 py-1.5 text-sm font-semibold rounded-md transition-all ${
                   isActive(l.href)
-                    ? "text-white bg-white/15"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
+                    ? "text-[#C8102E] bg-red-50/80 font-bold"
+                    : "text-[#0D1B3E] hover:text-[#C8102E] hover:bg-gray-50"
                 }`}
                 aria-current={isActive(l.href) ? "page" : undefined}
               >
@@ -73,44 +77,44 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* CTA + Hamburger */}
+          {/* WhatsApp CTA + Mobile toggle */}
           <div className="flex items-center gap-3">
             <button
               onClick={handleWA}
-              className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-[#25D366] hover:bg-[#1DB954] text-white text-sm font-semibold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer"
             >
               <MessageCircle size={16} />
               Book on WhatsApp
             </button>
             <button
               onClick={() => setMenuOpen((p) => !p)}
-              className="lg:hidden p-2 text-white"
+              className="lg:hidden p-2 text-[#0D1B3E] rounded-md hover:bg-gray-100 transition-colors"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
             >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+              {menuOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── Mobile Menu ── */}
+      {/* ── Mobile Slide Down Menu ── */}
       <div
-        className={`fixed inset-x-0 top-[72px] z-40 bg-[#0D1B3E] shadow-2xl transition-all duration-250 lg:hidden ${
+        className={`fixed inset-x-0 top-[68px] z-40 bg-white border-b border-gray-100 shadow-xl transition-all duration-250 lg:hidden ${
           menuOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
         }`}
         aria-hidden={!menuOpen}
       >
-        <nav className="px-4 py-4 flex flex-col gap-1" aria-label="Mobile navigation">
+        <nav className="px-5 py-4 flex flex-col gap-1" aria-label="Mobile navigation">
           {NAV_LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               tabIndex={menuOpen ? 0 : -1}
-              className={`px-4 py-3 text-[15px] font-medium rounded-lg transition-all ${
+              className={`px-4 py-3 text-[15px] font-semibold rounded-lg transition-all ${
                 isActive(l.href)
-                  ? "text-white bg-white/15"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "text-[#C8102E] bg-red-50 font-bold"
+                  : "text-[#0D1B3E] hover:text-[#C8102E] hover:bg-gray-50"
               }`}
             >
               {l.label}
@@ -119,7 +123,7 @@ export default function Navbar() {
           <button
             onClick={handleWA}
             tabIndex={menuOpen ? 0 : -1}
-            className="mt-3 flex items-center justify-center gap-2 py-3.5 bg-[#25D366] hover:bg-[#1DB954] text-white font-semibold rounded-lg transition-all cursor-pointer"
+            className="mt-3 flex items-center justify-center gap-2 py-3.5 bg-[#C8102E] hover:bg-[#A50D26] text-white font-bold rounded-lg shadow-sm transition-all cursor-pointer"
           >
             <MessageCircle size={18} />
             Book on WhatsApp
@@ -129,4 +133,3 @@ export default function Navbar() {
     </>
   );
 }
-

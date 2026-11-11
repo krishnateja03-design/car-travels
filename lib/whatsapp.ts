@@ -1,49 +1,93 @@
 import { SITE_CONFIG } from "./config";
 
+export interface BookingDetails {
+  name: string;
+  phone?: string;
+  pickup: string;
+  drop: string;
+  travelDate: string;
+  returnDate?: string;
+  vehicleType: string;
+  passengers: string;
+  requirements?: string;
+}
+
+/**
+ * Triggers WhatsApp redirect with pre-formatted message
+ */
 export function openWhatsApp(message: string): void {
   const url = `https://wa.me/${SITE_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank", "noopener,noreferrer");
+  if (typeof window !== "undefined") {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
 }
 
-export function buildBookingMessage(f: {
-  name: string; phone: string; pickup: string; drop: string;
-  travelDate: string; returnDate: string; vehicleType: string;
-  passengers: string; requirements: string;
-}): string {
-  return `🚗 *VASU CAR TRAVELS – Booking Enquiry*
+/**
+ * Formats structured booking enquiry for WhatsApp dispatch
+ */
+export function buildBookingMessage(b: BookingDetails): string {
+  const lines = [
+    `🚗 *${SITE_CONFIG.BUSINESS_NAME} – Trip Booking Enquiry*`,
+    ``,
+    `👤 *Customer:* ${b.name}`,
+    b.phone ? `📞 *Phone:* ${b.phone}` : null,
+    `📍 *Pickup:* ${b.pickup}`,
+    `🏁 *Destination:* ${b.drop}`,
+    `📅 *Travel Date:* ${b.travelDate}`,
+    b.returnDate ? `🔄 *Return Date:* ${b.returnDate}` : `🔄 *Trip Type:* One Way`,
+    `🚙 *Vehicle:* ${b.vehicleType}`,
+    `👥 *Passengers:* ${b.passengers}`,
+    b.requirements?.trim() ? `📝 *Special Requests:* ${b.requirements}` : null,
+    ``,
+    `_Sent via vasucartravels.com online booking_`,
+  ].filter(Boolean);
 
-👤 *Name:* ${f.name}
-📞 *Phone:* ${f.phone}
-📍 *Pickup:* ${f.pickup}
-🏁 *Drop:* ${f.drop}
-📅 *Travel Date:* ${f.travelDate}
-🔄 *Return Date:* ${f.returnDate || "One Way"}
-🚙 *Vehicle Type:* ${f.vehicleType}
-👥 *Passengers:* ${f.passengers}
-📝 *Requirements:* ${f.requirements || "None"}
-
-Please confirm availability and share pricing. Thank you!`;
+  return lines.join("\n");
 }
 
-export function buildVehicleEnquiry(name: string, category: string, pickup = "", drop = "", date = ""): string {
-  return `🚗 *VASU CAR TRAVELS – Vehicle Enquiry*
+/**
+ * Formats single-vehicle enquiry message
+ */
+export function buildVehicleEnquiry(
+  name: string,
+  category: string,
+  pickup = "",
+  drop = "",
+  date = ""
+): string {
+  const lines = [
+    `🚗 *${SITE_CONFIG.BUSINESS_NAME} – Vehicle Enquiry*`,
+    ``,
+    `🚙 *Vehicle:* ${name} (${category})`,
+    pickup ? `📍 *Pickup Location:* ${pickup}` : null,
+    drop ? `🏁 *Drop Location:* ${drop}` : null,
+    date ? `📅 *Travel Date:* ${date}` : null,
+    ``,
+    `Please share availability and fare quote. Thank you!`,
+  ].filter(Boolean);
 
-🚙 *Vehicle:* ${name} (${category})
-${pickup ? `📍 *Pickup:* ${pickup}` : ""}
-${drop   ? `🏁 *Drop:* ${drop}` : ""}
-${date   ? `📅 *Date:* ${date}` : ""}
-
-I'm interested in hiring this vehicle. Please share availability & pricing. Thank you!`;
+  return lines.join("\n");
 }
 
-export function buildTourEnquiry(title: string, duration: string, passengers = "", date = ""): string {
-  return `🌟 *VASU CAR TRAVELS – Tour Package Enquiry*
+/**
+ * Formats tour package enquiry message
+ */
+export function buildTourEnquiry(
+  title: string,
+  duration: string,
+  passengers = "",
+  date = ""
+): string {
+  const lines = [
+    `🌟 *${SITE_CONFIG.BUSINESS_NAME} – Tour Package Enquiry*`,
+    ``,
+    `📦 *Package:* ${title}`,
+    `⏱ *Duration:* ${duration}`,
+    passengers ? `👥 *Passengers:* ${passengers}` : null,
+    date ? `📅 *Preferred Date:* ${date}` : null,
+    ``,
+    `Please share itinerary details, vehicle options, and cost quote. Thank you!`,
+  ].filter(Boolean);
 
-📦 *Package:* ${title}
-⏱ *Duration:* ${duration}
-${passengers ? `👥 *Passengers:* ${passengers}` : ""}
-${date       ? `📅 *Preferred Date:* ${date}` : ""}
-
-I'm interested in this package. Please share details & pricing. Thank you!`;
+  return lines.join("\n");
 }
-

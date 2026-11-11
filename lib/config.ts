@@ -1,17 +1,31 @@
-// ============================================================
-// VASU CAR TRAVELS – Site Configuration
-// ⚠️  Update WHATSAPP_NUMBER with the real owner number
-//     Format: country code + number, no + or spaces
-//     Example India: "919876543210"
-// ============================================================
+/**
+ * ============================================================
+ * VASU CAR TRAVELS – Core Business Configuration
+ * ============================================================
+ * Centralized enterprise settings for business contact info,
+ * operational hours, and messaging links.
+ */
 
 export const SITE_CONFIG = {
   BUSINESS_NAME: "VASU CAR TRAVELS",
-  TAGLINE: "Premium Car Rentals Across South India",
+  TAGLINE: "Your Journey, Our Priority",
+  SUB_TAGLINE: "Premium Car Rentals Across South India",
   LOCATION: "Nellore, Andhra Pradesh",
-  WHATSAPP_NUMBER: "919999999999",   // ← Replace this
-  EMAIL: "info@vasucartravels.com",
-  PHONE: "+91 99999 99999",          // ← Replace this
+  
+  // Format: CountryCode + Number (No + or spaces)
+  WHATSAPP_NUMBER: "919999999999",
+  
+  PHONE: "+91 99999 99999",
+  EMAIL: "vasucartravels@gmail.com",
   ADDRESS: "Nellore, Andhra Pradesh – 524001",
+  
+  COVERAGE_REGIONS: [
+    "Andhra Pradesh",
+    "Tamil Nadu",
+    "Karnataka",
+    "Telangana",
+    "Kerala",
+  ],
 } as const;
 
+export type SiteConfig = typeof SITE_CONFIG;

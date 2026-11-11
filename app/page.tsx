@@ -4,416 +4,596 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import {
-  MessageCircle, ChevronRight, Shield, Clock, Star, MapPin,
-  Users, Car, CheckCircle, Bus, Truck, ArrowRight, Phone,
+  MessageCircle, ChevronRight, ShieldCheck, Clock, Star, MapPin,
+  Users, Car, CheckCircle, Bus, Truck, ArrowRight, Phone, Calendar,
+  Sparkles, Award, Navigation
 } from "lucide-react";
 import VehicleCard from "@/components/VehicleCard";
 import { openWhatsApp, buildBookingMessage } from "@/lib/whatsapp";
 import { VEHICLES } from "@/lib/data";
 
-/* ─── data ─────────────────────────────────────────────── */
-const WHY_US = [
-  { icon: Shield, title: "Safe & Reliable", desc: "Sanitized, well-maintained vehicles with professional, licensed drivers on every trip." },
-  { icon: Clock, title: "24/7 Availability", desc: "Round-the-clock service for airport transfers, emergencies, and planned journeys." },
-  { icon: Star, title: "5-Star Rated", desc: "Consistently rated 5 stars by thousands of happy customers across South India." },
-  { icon: MapPin, title: "Wide Coverage", desc: "All major destinations across AP, Telangana, Tamil Nadu & Karnataka." },
-  { icon: Users, title: "Expert Drivers", desc: "Experienced local drivers who know every route for a smooth, comfortable journey." },
-  { icon: Car, title: "Premium Fleet", desc: "Economy sedans to luxury coaches — the right vehicle for every trip." },
-  { icon: MessageCircle, title: "Instant Booking", desc: "Book instantly via WhatsApp. Get confirmation in minutes, not hours." },
-  { icon: CheckCircle, title: "No Hidden Charges", desc: "Transparent, all-inclusive pricing. What you see is what you pay." },
+const WHY_US_BENEFITS = [
+  { icon: ShieldCheck, title: "Safe & Reliable Travel", desc: "Verified chauffeurs, GPS-enabled fleet, and thoroughly sanitized vehicles for high-speed highway peace of mind." },
+  { icon: Car,         title: "Well Maintained Vehicles", desc: "Regularly serviced vehicles, pristine interiors, powerful dual AC, and zero breakdown guarantee." },
+  { icon: Users,       title: "Professional Drivers", desc: "Courteous, non-smoking, well-trained drivers with deep knowledge of South India routes and destinations." },
+  { icon: Clock,       title: "24/7 Dispatch Support", desc: "Round-the-clock emergency assistance, live trip tracking, and instant WhatsApp booking confirmation." },
 ];
 
-const TESTIMONIALS = [
-  { text: "Excellent service! The driver was punctual and the car was spotless. Highly recommend Vasu Car Travels for Tirupati trips.", name: "Ravi Kumar", loc: "Nellore", stars: 5 },
-  { text: "Booked a Tempo Traveller for our family trip to Ooty. Everything was smooth — the driver knew all the best stops!", name: "Priya Sharma", loc: "Nellore", stars: 5 },
-  { text: "Corporate trips to Hyderabad are now stress-free thanks to Vasu Cars. Professional, on-time and comfortable every time.", name: "Suresh Reddy", loc: "Nellore", stars: 5 },
+const SERVICE_SOLUTIONS = [
+  { label: "Car Rentals", sub: "(South India)", icon: Car, href: "/vehicles?cat=Sedans" },
+  { label: "Tempo Traveller", sub: "(All India)", icon: Truck, href: "/vehicles?cat=Tempo%20Travellers" },
+  { label: "Bus Rentals", sub: "(All India)", icon: Bus, href: "/vehicles?cat=Buses" },
+  { label: "Tours & Packages", sub: "(South India)", icon: MapPin, href: "/tours" },
 ];
 
-const DESTINATIONS = [
-  { name: "Tirupati", dist: "140 km", img: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=500&q=80" },
-  { name: "Chennai", dist: "170 km", img: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=500&q=80" },
-  { name: "Bangalore", dist: "380 km", img: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=500&q=80" },
-  { name: "Hyderabad", dist: "280 km", img: "https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?w=500&q=80" },
+const VEHICLE_CATEGORIES_LIST = [
+  "All",
+  "Luxury Vans",
+  "SUVs & MPVs",
+  "Tempo Travellers",
+  "Buses",
+  "Sedans",
 ];
 
-const CATEGORIES = [
-  { label: "Sedan", icon: Car, count: 2 },
-  { label: "SUV", icon: Car, count: 2 },
-  { label: "Tempo Traveller", icon: Truck, count: 2 },
-  { label: "Mini Bus", icon: Bus, count: 2 },
-  { label: "Tourist Bus", icon: Bus, count: 1 },
-  { label: "Luxury", icon: Star, count: 2 },
-];
-
-const FEATURED = VEHICLES.slice(0, 3);
-
-/* ─── component ────────────────────────────────────────── */
 export default function Home() {
-  const [form, setForm] = useState({ pickup: "", drop: "", date: "", vehicleType: "Sedan" });
+  const [selectedCat, setSelectedCat] = useState("All");
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    pickup: "",
+    drop: "",
+    travelDate: "",
+    returnDate: "",
+    vehicleType: "Innova Crysta",
+    passengers: "4",
+    requirements: "",
+  });
+
   const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
   const handleWA = () => openWhatsApp("Hi! I'd like to book a car with Vasu Car Travels, Nellore.");
 
-  const handleQuickBook = (e: React.FormEvent) => {
+  const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     openWhatsApp(buildBookingMessage({
-      name: "Customer", phone: "", pickup: form.pickup, drop: form.drop,
-      travelDate: form.date, returnDate: "", vehicleType: form.vehicleType,
-      passengers: "", requirements: "",
+      name: form.name || "Customer",
+      phone: form.phone || "Not specified",
+      pickup: form.pickup,
+      drop: form.drop,
+      travelDate: form.travelDate,
+      returnDate: form.returnDate,
+      vehicleType: form.vehicleType,
+      passengers: form.passengers,
+      requirements: form.requirements,
     }));
   };
 
-  const inputCls = "w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-[#0D1B3E] focus:outline-none focus:ring-2 focus:ring-[#0D1B3E]/10 transition-all appearance-none";
-  const labelCls = "block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5";
+  const filteredVehicles = selectedCat === "All"
+    ? VEHICLES
+    : VEHICLES.filter((v) => v.category === selectedCat);
 
   return (
-    <div className="animate-fade-up">
-      {/* ════════════════════════════════
-          HERO
-      ════════════════════════════════ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* BG */}
-        <div className="absolute inset-0">
+    <div className="animate-fade-up bg-white text-[#0D1B3E]">
+
+      {/* ══════════════════════════════════════════════════════════
+          1. HERO SECTION (Mirroring Reference Image 1)
+      ══════════════════════════════════════════════════════════ */}
+      <section className="relative pt-24 pb-20 md:pt-32 md:pb-28 overflow-hidden bg-gradient-to-br from-[#071020] via-[#0D1B3E] to-[#1A2F5E]">
+        {/* Background Image with scenic mountain / road overlay */}
+        <div className="absolute inset-0 opacity-40 mix-blend-overlay">
           <Image
             src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1800&q=85"
-            alt="South India highway travel"
-            fill priority
+            alt="South India Scenic Travel Road"
+            fill
+            priority
             className="object-cover"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#071020]/92 via-[#0D1B3E]/80 to-[#0D1B3E]/60" />
         </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B3E] via-transparent to-black/30 pointer-events-none" />
 
-        {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-24 w-full">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#C8102E]/20 border border-[#C8102E]/40 rounded-full mb-7">
-            <span className="w-2 h-2 bg-[#C8102E] rounded-full animate-pulse-dot" />
-            <span className="text-[13px] font-semibold text-[#FFB3BE] tracking-wide">
-              Premium Car Rentals · Nellore, AP
-            </span>
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="max-w-2xl mb-10">
+            {/* Tagline Indicator */}
+            <div className="inline-flex items-center gap-2 mb-4">
+              <span className="w-6 h-0.5 bg-[#C8102E]" />
+              <span className="text-xs font-black tracking-[2px] uppercase text-white/90">
+                VASU CAR TRAVELS – NELLORE
+              </span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="font-black text-4xl sm:text-6xl lg:text-7xl text-white tracking-tight leading-[1.08] uppercase mb-4">
+              Your Journey, <br />
+              <span className="text-[#C8102E]">Our Priority</span>
+            </h1>
+
+            <p className="text-lg sm:text-xl text-white/80 font-medium mb-8">
+              Premium Car Rentals Across South India
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                onClick={handleWA}
+                className="flex items-center gap-2 px-7 py-3.5 bg-[#C8102E] hover:bg-[#A50D26] text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer"
+              >
+                <MessageCircle size={18} />
+                Book on WhatsApp
+              </button>
+              <Link
+                href="/vehicles"
+                className="flex items-center gap-2 px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg border border-white/20 backdrop-blur-sm transition-all"
+              >
+                Explore Vehicles <ChevronRight size={16} />
+              </Link>
+            </div>
           </div>
 
-          {/* Headline */}
-          <h1 className="font-['Playfair_Display'] text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-[1.08] mb-4">
-            Your Journey,
-            <span className="block text-[#D4AF37]">Our Priority.</span>
-          </h1>
-          <p className="text-xl sm:text-2xl text-white/70 font-light mb-4">
-            Premium Car Rentals Across South India
-          </p>
-          <p className="text-base text-white/60 max-w-xl leading-relaxed mb-10">
-            From comfortable sedans to spacious buses — travel in style and safety with VASU CAR TRAVELS. Trusted by thousands of happy travellers.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-16">
-            <button
-              onClick={handleWA}
-              className="flex items-center justify-center gap-2.5 px-8 py-4 bg-[#25D366] hover:bg-[#1DB954] text-white text-base font-bold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-xl cursor-pointer"
-            >
-              <MessageCircle size={20} />
-              Book on WhatsApp
-            </button>
-            <Link
-              href="/vehicles"
-              className="flex items-center justify-center gap-2 px-8 py-4 bg-transparent border-2 border-white/60 hover:bg-white/10 hover:border-white text-white text-base font-semibold rounded-lg transition-all"
-            >
-              Explore Vehicles <ChevronRight size={18} />
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="flex flex-wrap gap-10 pt-10 border-t border-white/12">
-            {[["20000+", "Happy Customers"], ["20+", "Years Experience"], ["10+", "Vehicles"], ["24/7", "Support"]].map(([n, l]) => (
-              <div key={l}>
-                <div className="text-3xl font-extrabold text-white leading-none">{n}</div>
-                <div className="text-sm text-white/55 mt-1">{l}</div>
+          {/* Featured Vehicle Fleet Banner with Force Urbania & Innova */}
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 aspect-[16/8] sm:aspect-[21/9] bg-black/40">
+            <Image
+              src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1600&q=85"
+              alt="Premium fleet vehicles"
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width:1200px) 100vw,1200px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 sm:p-8">
+              <div className="flex flex-wrap items-center justify-between w-full gap-4 text-white">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#C8102E] bg-white px-2.5 py-0.5 rounded-sm">Fleet Showcase</span>
+                  <p className="text-xl sm:text-2xl font-black mt-1">Force Urbania, Innova Crysta & Luxury Hycross</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-semibold text-white/70">Starting at standard outstation km rates</span>
+                  <p className="text-sm font-bold text-emerald-400">All-Inclusive Packages Available</p>
+                </div>
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* 4 Feature Badges on Hero Footer (From Design Reference) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/10">
+            {WHY_US_BENEFITS.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <div key={idx} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 backdrop-blur-xs">
+                  <div className="w-10 h-10 rounded-lg bg-[#C8102E]/20 flex items-center justify-center shrink-0">
+                    <Icon size={20} className="text-[#C8102E]" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold text-white leading-tight">{item.title}</h4>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ════════════════════════════════
-          QUICK BOOKING BAR
-      ════════════════════════════════ */}
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="-mt-12 relative z-10 bg-white rounded-2xl shadow-2xl p-7 border border-gray-100">
-          <div className="flex items-center gap-2 mb-5">
-            <MapPin size={20} className="text-[#C8102E]" />
-            <h2 className="text-lg font-bold text-[#0D1B3E]">Quick Booking</h2>
-          </div>
-          <form onSubmit={handleQuickBook}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-            <div>
-              <label className={labelCls} htmlFor="b-pickup">Pickup Location</label>
-              <input id="b-pickup" required value={form.pickup} onChange={e => set("pickup", e.target.value)}
-                placeholder="e.g. Nellore" className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="b-drop">Drop Location</label>
-              <input id="b-drop" required value={form.drop} onChange={e => set("drop", e.target.value)}
-                placeholder="e.g. Tirupati" className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="b-date">Travel Date</label>
-              <input id="b-date" required type="date" value={form.date} onChange={e => set("date", e.target.value)}
-                className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="b-vtype">Vehicle Type</label>
-              <select id="b-vtype" value={form.vehicleType} onChange={e => set("vehicleType", e.target.value)}
-                className={inputCls}>
-                {CATEGORIES.map(c => <option key={c.label}>{c.label}</option>)}
-              </select>
-            </div>
-            <button type="submit"
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-[#C8102E] hover:bg-[#A50D26] text-white font-bold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-lg cursor-pointer h-[46px]">
-              <MessageCircle size={16} />
-              Check via WhatsApp
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* ════════════════════════════════
-          VEHICLE CATEGORIES
-      ════════════════════════════════ */}
-      <section className="py-20" aria-label="Vehicle categories">
+      {/* ══════════════════════════════════════════════════════════
+          2. COMFORTABLE RIDES / ABOUT SECTION (Mirroring Reference)
+      ══════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-gray-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">Our Fleet</span>
-            <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-[#0D1B3E] mt-2 mb-3">Choose Your Vehicle</h2>
-            <div className="w-14 h-1 bg-[#C8102E] rounded mx-auto mb-4" />
-            <p className="text-gray-500 max-w-xl mx-auto leading-relaxed">
-              From compact sedans to large tourist buses — the right vehicle for every trip, every group, and every budget.
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-7">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-6 h-0.5 bg-[#C8102E]" />
+                <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">
+                  ABOUT VASU CAR TRAVELS
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0D1B3E] tracking-tight leading-tight mb-6">
+                Comfortable Rides. <br />
+                <span className="text-[#C8102E]">Unforgettable Journeys.</span>
+              </h2>
+              <p className="text-base text-gray-600 leading-relaxed mb-6">
+                VASU CAR TRAVELS, based in Nellore, offers premium car and van rentals across South India and tempo travellers & buses across India. Whether it's a family trip, corporate travel, wedding or a group tour — we make your journey smooth, safe, and memorable.
+              </p>
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/about"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-bold rounded-lg shadow-md transition-all cursor-pointer"
+                >
+                  Know More →
+                </Link>
+                <button
+                  onClick={handleWA}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-100 text-[#0D1B3E] text-sm font-bold rounded-lg border border-gray-300 transition-all cursor-pointer"
+                >
+                  <MessageCircle size={16} className="text-[#25D366]" /> Chat on WhatsApp
+                </button>
+              </div>
+            </div>
+
+            {/* Right Card with Landscape "Explore South India" Banner */}
+            <div className="lg:col-span-5">
+              <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-[4/3] group">
+                <Image
+                  src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80"
+                  alt="Explore South India with Vasu Car Travels"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width:1024px) 100vw,500px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
+                  <div>
+                    <span className="px-3 py-1 bg-[#C8102E] text-white text-xs font-black uppercase rounded-md">
+                      Speciality Tours
+                    </span>
+                    <h3 className="text-2xl font-black text-white mt-2">Explore South India</h3>
+                    <p className="text-xs text-white/80 mt-1">Nellore • Tirupati • Chennai • Bangalore • Hyderabad • Ooty</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════
+          3. TRAVEL SOLUTIONS FOR EVERY NEED (Mirroring Reference)
+      ══════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-xl mx-auto mb-14">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="w-6 h-0.5 bg-[#C8102E]" />
+              <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">
+                OUR SERVICES
+              </span>
+              <span className="w-6 h-0.5 bg-[#C8102E]" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0D1B3E] tracking-tight">
+              Travel Solutions for Every Need
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {SERVICE_SOLUTIONS.map((s, idx) => {
+              const Icon = s.icon;
+              return (
+                <Link
+                  key={idx}
+                  href={s.href}
+                  className="group flex flex-col items-center justify-center p-8 bg-gray-50 hover:bg-[#0D1B3E] border border-gray-100 hover:border-[#0D1B3E] rounded-2xl transition-all duration-300 text-center shadow-xs hover:shadow-xl hover:-translate-y-1"
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-white group-hover:bg-[#C8102E] flex items-center justify-center shadow-sm mb-4 transition-colors">
+                    <Icon size={28} className="text-[#0D1B3E] group-hover:text-white transition-colors" />
+                  </div>
+                  <h3 className="text-base font-black text-[#0D1B3E] group-hover:text-white transition-colors">
+                    {s.label}
+                  </h3>
+                  <span className="text-xs text-gray-500 group-hover:text-white/70 transition-colors mt-1 font-semibold">
+                    {s.sub}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════
+          4. PREMIUM VEHICLES FOR EVERY JOURNEY (Mirroring Middle Screen)
+      ══════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-gray-50 border-t border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-0.5 bg-[#C8102E]" />
+                <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">
+                  OUR FLEET
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-[#0D1B3E] tracking-tight">
+                Premium Vehicles for Every Journey
+              </h2>
+              <p className="text-sm text-gray-500 mt-1 max-w-lg">
+                Well-maintained, comfortable and reliable vehicles for your travel needs in Nellore and across South India.
+              </p>
+            </div>
+
+            {/* Category Selector Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+              {VEHICLE_CATEGORIES_LIST.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCat(cat)}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    selectedCat === cat
+                      ? "bg-[#0D1B3E] text-white shadow-sm"
+                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Vehicle Cards Grid - 6 Featured Cards exact as in customer image */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredVehicles.slice(0, 6).map((vehicle) => (
+              <VehicleCard key={vehicle.id} vehicle={vehicle} />
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/vehicles"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#0D1B3E] hover:bg-[#1A2F5E] text-white text-sm font-bold rounded-xl shadow-md transition-all cursor-pointer"
+            >
+              View Full Fleet (All 8+ Categories) →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════
+          5. PLAN YOUR JOURNEY & BOOKING ENQUIRY (Mirroring Right Screen)
+      ══════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-white" id="booking-section">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-12">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-6 h-0.5 bg-[#C8102E]" />
+              <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">
+                GET IN TOUCH
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black text-[#0D1B3E] tracking-tight">
+              Plan Your Journey
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Tell us your travel details and we'll get back to you with the best vehicle and quote.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {CATEGORIES.map(({ label, icon: Icon, count }) => (
-              <Link
-                key={label}
-                href={`/vehicles?cat=${encodeURIComponent(label)}`}
-                className="group flex flex-col items-center gap-3 p-6 bg-white border-2 border-gray-100 rounded-xl hover:border-[#0D1B3E] hover:shadow-lg transition-all text-center"
-              >
-                <div className="w-14 h-14 bg-gray-100 group-hover:bg-[#0D1B3E] rounded-2xl flex items-center justify-center transition-all">
-                  <Icon size={24} className="text-[#0D1B3E] group-hover:text-white transition-colors" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            {/* Left Column: Booking Enquiry Form */}
+            <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-200 shadow-xl p-8">
+              <div className="flex items-center gap-3 pb-5 border-b border-gray-100 mb-6">
+                <div className="w-9 h-9 rounded-lg bg-[#C8102E] flex items-center justify-center text-white">
+                  <Phone size={18} />
                 </div>
-                <span className="text-sm font-bold text-gray-800 leading-tight">{label}</span>
-                <span className="text-[11px] text-gray-400">{count} Vehicles</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════
-          FEATURED VEHICLES
-      ════════════════════════════════ */}
-      <section className="py-20 bg-gray-50" aria-label="Featured vehicles">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-end justify-between gap-4 mb-12 flex-wrap">
-            <div>
-              <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">Popular Picks</span>
-              <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-[#0D1B3E] mt-2">Featured Vehicles</h2>
-            </div>
-            <Link
-              href="/vehicles"
-              className="flex items-center gap-2 px-6 py-3 bg-[#0D1B3E] text-white text-sm font-semibold rounded-lg hover:bg-[#1A2F5E] transition-all"
-            >
-              View All Vehicles <ArrowRight size={16} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-            {FEATURED.map((v) => <VehicleCard key={v.id} vehicle={v} />)}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════
-          WHY CHOOSE US
-      ════════════════════════════════ */}
-      <section className="py-20" aria-label="Why choose us">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">Why Us</span>
-            <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-[#0D1B3E] mt-2 mb-3">Why Choose Vasu Car Travels?</h2>
-            <div className="w-14 h-1 bg-[#C8102E] rounded mx-auto mb-4" />
-            <p className="text-gray-500 max-w-xl mx-auto">We don't just take you from A to B — we make every journey memorable.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {WHY_US.map(({ icon: Icon, title, desc }) => (
-              <div key={title}
-                className="group p-7 border border-gray-100 rounded-xl hover:border-[#0D1B3E] hover:shadow-lg transition-all">
-                <div className="w-14 h-14 bg-[#0D1B3E]/7 group-hover:bg-[#0D1B3E] rounded-2xl flex items-center justify-center mb-4 transition-all">
-                  <Icon size={24} className="text-[#0D1B3E] group-hover:text-white transition-colors" />
+                <div>
+                  <h3 className="text-lg font-black text-[#0D1B3E]">Booking Enquiry</h3>
+                  <p className="text-xs text-gray-500">Fast confirmation via WhatsApp directly to owner</p>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* ════════════════════════════════
-          ABOUT
-      ════════════════════════════════ */}
-      <section className="py-20 bg-gray-50" aria-label="About">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Images */}
-            <div className="relative">
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=700&q=80"
-                  alt="Vasu Car Travels fleet"
-                  fill className="object-cover" sizes="(max-width:1024px) 100vw,560px"
-                />
-              </div>
-              {/* Accent image */}
-              <div className="hidden sm:block absolute -bottom-6 -right-6 w-48 aspect-[4/3] rounded-xl overflow-hidden border-4 border-white shadow-xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&q=80"
-                  alt="Professional driver"
-                  fill className="object-cover" sizes="200px"
-                />
-              </div>
-              {/* Floating badge */}
-              <div className="absolute top-6 -left-5 bg-[#0D1B3E] text-white px-5 py-3 rounded-xl shadow-xl text-center">
-                <div className="text-3xl font-extrabold leading-none">10+</div>
-                <div className="text-[11px] opacity-70 uppercase tracking-wide mt-1">Years of Trust</div>
-              </div>
-            </div>
-
-            {/* Text */}
-            <div className="flex flex-col gap-5">
-              <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">About Us</span>
-              <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-[#0D1B3E] leading-tight">
-                Nellore's Most Trusted Car Travel Service
-              </h2>
-              <div className="w-14 h-1 bg-[#C8102E] rounded" />
-              <p className="text-gray-500 leading-relaxed">
-                VASU CAR TRAVELS has been Nellore's premier car rental and travel service for over a decade. Founded with a commitment to safety, punctuality, and exceptional customer service, we've grown to serve thousands of families, corporates, and pilgrims across South India.
-              </p>
-              <p className="text-gray-500 leading-relaxed">
-                Our fleet of well-maintained vehicles, combined with our professional driver network, ensures every journey is comfortable, safe, and memorable.
-              </p>
-
-              <ul className="flex flex-col gap-3">
-                {["GPS-tracked fleet for complete safety", "Professional, licensed & verified drivers", "Transparent, all-inclusive pricing", "24/7 customer support & emergency assistance"].map(h => (
-                  <li key={h} className="flex items-center gap-3 text-sm font-medium text-gray-700">
-                    <CheckCircle size={17} className="text-[#C8102E] shrink-0" /> {h}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex gap-3 flex-wrap mt-2">
-                <button onClick={handleWA}
-                  className="flex items-center gap-2 px-7 py-3.5 bg-[#C8102E] hover:bg-[#A50D26] text-white font-bold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-lg cursor-pointer">
-                  <MessageCircle size={16} /> Book Now
-                </button>
-                <Link href="/about"
-                  className="flex items-center gap-2 px-7 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-lg transition-all">
-                  Learn More <ChevronRight size={16} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════
-          DESTINATIONS
-      ════════════════════════════════ */}
-      <section className="py-20" aria-label="Destinations">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">Service Areas</span>
-            <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-[#0D1B3E] mt-2 mb-3">Popular Destinations</h2>
-            <div className="w-14 h-1 bg-[#C8102E] rounded mx-auto mb-4" />
-            <p className="text-gray-500">We cover all major destinations from Nellore across South India.</p>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-            {DESTINATIONS.map(d => (
-              <Link key={d.name} href="/contact"
-                className="group relative rounded-xl overflow-hidden aspect-[3/4] block"
-                aria-label={`Book trip to ${d.name}`}>
-                <Image src={d.img} alt={d.name} fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width:640px) 50vw,(max-width:1024px) 25vw,300px" loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#071020]/90 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <div className="text-white font-bold text-lg">{d.name}</div>
-                  <div className="text-white/65 text-xs mt-1">{d.dist} from Nellore</div>
+              <form onSubmit={handleBookingSubmit} className="flex flex-col gap-4 text-left">
+                {/* Name */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Name *
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => set("name", e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-colors"
+                  />
                 </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* ════════════════════════════════
-          TESTIMONIALS
-      ════════════════════════════════ */}
-      <section className="py-20 bg-[#0D1B3E]" aria-label="Testimonials">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-[2px] uppercase text-[#FFB3BE]">Testimonials</span>
-            <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-white mt-2 mb-3">What Our Customers Say</h2>
-            <div className="w-14 h-1 bg-[#C8102E] rounded mx-auto" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i}
-                className="p-7 bg-white/7 border border-white/10 rounded-xl hover:bg-white/11 hover:-translate-y-1 transition-all">
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.stars }).map((_, j) => (
-                    <span key={j} className="text-yellow-400 text-lg">★</span>
-                  ))}
-                </div>
-                <p className="text-sm text-white/75 leading-relaxed italic mb-6">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-[#C8102E]/30 flex items-center justify-center text-white font-bold text-lg shrink-0">
-                    {t.name[0]}
+                {/* Pickup & Destination */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      Pickup Location *
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      value={form.pickup}
+                      onChange={(e) => set("pickup", e.target.value)}
+                      placeholder="Enter pickup location (e.g. Nellore)"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-colors"
+                    />
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-white">{t.name}</div>
-                    <div className="text-xs text-white/50">{t.loc}</div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      Destination *
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      value={form.drop}
+                      onChange={(e) => set("drop", e.target.value)}
+                      placeholder="Enter destination (e.g. Tirupati / Chennai)"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Travel Date & Return Date */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      Travel Date *
+                    </label>
+                    <input
+                      required
+                      type="date"
+                      value={form.travelDate}
+                      onChange={(e) => set("travelDate", e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      Return Date (Optional)
+                    </label>
+                    <input
+                      type="date"
+                      value={form.returnDate}
+                      onChange={(e) => set("returnDate", e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Vehicle Required & Number of Passengers */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      Vehicle Required *
+                    </label>
+                    <select
+                      value={form.vehicleType}
+                      onChange={(e) => set("vehicleType", e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-colors"
+                    >
+                      <option value="Force Urbania (16/17 Seater)">Force Urbania (16/17 Seater)</option>
+                      <option value="Innova Crysta (7/8 Seater)">Innova Crysta (7/8 Seater)</option>
+                      <option value="Innova Hycross (7 Seater Luxury)">Innova Hycross (7 Seater Luxury)</option>
+                      <option value="Tempo Traveller (12/17 Seater)">Tempo Traveller (12/17 Seater)</option>
+                      <option value="Tourist Bus (40/50 Seater)">Tourist Bus (40/50 Seater)</option>
+                      <option value="Toyota Fortuner (4x4 SUV)">Toyota Fortuner (4x4 SUV)</option>
+                      <option value="Sedan (Etios / Dzire)">Sedan (Etios / Dzire)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      Number of Passengers *
+                    </label>
+                    <select
+                      value={form.passengers}
+                      onChange={(e) => set("passengers", e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-colors"
+                    >
+                      <option value="1-4 Passengers">1 - 4 Passengers</option>
+                      <option value="5-7 Passengers">5 - 7 Passengers</option>
+                      <option value="8-12 Passengers">8 - 12 Passengers</option>
+                      <option value="13-17 Passengers">13 - 17 Passengers</option>
+                      <option value="18-32 Passengers">18 - 32 Passengers</option>
+                      <option value="33-50+ Passengers">33 - 50+ Passengers</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Additional details */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Special Notes (Optional)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={form.requirements}
+                    onChange={(e) => set("requirements", e.target.value)}
+                    placeholder="Specific stops, AC preferences, luggage notes..."
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-colors resize-none"
+                  />
+                </div>
+
+                {/* Submit button directly to WhatsApp */}
+                <button
+                  type="submit"
+                  className="mt-2 w-full flex items-center justify-center gap-2 py-4 bg-[#C8102E] hover:bg-[#A50D26] text-white text-base font-black uppercase tracking-wider rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                >
+                  <MessageCircle size={20} />
+                  Book on WhatsApp
+                </button>
+                <p className="text-center text-xs text-gray-400 font-semibold mt-1">
+                  We'll get back to you shortly on WhatsApp with instant availability and fare quotes.
+                </p>
+              </form>
+            </div>
+
+            {/* Right Column: Why Choose Us & Road Image (Exact as Right Reference Screen) */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              {/* Navy Blue Card */}
+              <div className="bg-[#0D1B3E] text-white rounded-2xl p-7 shadow-xl">
+                <h3 className="text-xl font-black mb-6">Why Choose Us?</h3>
+                <div className="flex flex-col gap-5 text-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Car size={20} className="text-[#C8102E]" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-sm">Wide Range of Vehicles</h4>
+                      <p className="text-xs text-white/60 mt-0.5">Cars, Tempo Travellers, Luxury Vans & Buses.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck size={20} className="text-[#C8102E]" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-sm">Well Maintained Fleet</h4>
+                      <p className="text-xs text-white/60 mt-0.5">Clean, safe, comfortable, and sanitized.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Users size={20} className="text-[#C8102E]" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-sm">Experienced Drivers</h4>
+                      <p className="text-xs text-white/60 mt-0.5">Professional, verified, and route experts.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <Calendar size={20} className="text-[#C8102E]" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-sm">Flexible Booking</h4>
+                      <p className="text-xs text-white/60 mt-0.5">Easy & hassle-free round trips and one-way drops.</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
+
+              {/* Highway Photo with "Your Journey, Our Priority" Watermark */}
+              <div className="relative rounded-2xl overflow-hidden aspect-[16/10] shadow-lg group">
+                <Image
+                  src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80"
+                  alt="Scenic highway travel"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width:1024px) 100vw,500px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B3E]/90 via-transparent to-transparent flex items-end p-6">
+                  <div>
+                    <p className="font-serif italic text-white/90 text-2xl font-black">
+                      Your Journey, <br />
+                      <span className="text-[#C8102E] font-sans not-italic font-black text-xl">Our Priority</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Service Area Bar (Exact from reference bottom) */}
+          <div className="mt-14 p-6 bg-gray-50 border border-gray-200 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+            <div className="flex items-center gap-3">
+              <MapPin size={22} className="text-[#C8102E] shrink-0" />
+              <div>
+                <span className="text-[11px] font-black uppercase tracking-wider text-gray-400">Our Service Area</span>
+                <p className="text-base font-black text-[#0D1B3E]">
+                  South India Car Rentals <span className="text-gray-300 mx-2">|</span> Tempo & Bus Rentals Across India
+                </p>
+              </div>
+            </div>
+            <p className="text-xs font-semibold text-gray-500">
+              Tamil Nadu • Kerala • Karnataka • Andhra Pradesh • Telangana • And More...
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ════════════════════════════════
-          CTA BANNER
-      ════════════════════════════════ */}
-      <section className="py-20 bg-gradient-to-br from-[#C8102E] to-[#9B0C23]" aria-label="Call to action">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-            <div>
-              <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-white mb-3">
-                Ready to Plan Your Trip?
-              </h2>
-              <p className="text-white/80 text-lg">Get instant quotes and book your journey in minutes via WhatsApp.</p>
-            </div>
-            <div className="flex gap-4 flex-wrap shrink-0">
-              <button onClick={handleWA}
-                className="flex items-center gap-2 px-8 py-4 bg-white hover:bg-gray-100 text-[#C8102E] font-bold rounded-lg transition-all hover:-translate-y-0.5 cursor-pointer">
-                <MessageCircle size={18} /> Book on WhatsApp
-              </button>
-              <Link href="/contact"
-                className="flex items-center gap-2 px-8 py-4 bg-transparent border-2 border-white/60 hover:border-white hover:bg-white/10 text-white font-semibold rounded-lg transition-all">
-                <Phone size={18} /> Contact Us
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
