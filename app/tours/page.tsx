@@ -2,7 +2,18 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { MapPin, Clock, CheckCircle, MessageCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  MapPin,
+  Clock,
+  CheckCircle,
+  MessageCircle,
+  Compass,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Calendar,
+} from "lucide-react";
 import { openWhatsApp, buildTourEnquiry } from "@/lib/whatsapp";
 import { TOUR_PACKAGES, type TourPackage } from "@/lib/data";
 
@@ -11,177 +22,329 @@ const TOUR_CATS = ["All", "Pilgrimage", "City Tour", "Hill Station", "Nature", "
 export default function ToursPage() {
   const [active, setActive] = useState("All");
   const [customForm, setCustomForm] = useState({
-    name: "", phone: "", destination: "", passengers: "", date: "", message: "",
+    name: "",
+    phone: "",
+    destination: "",
+    passengers: "4",
+    date: "",
+    message: "",
   });
 
-  const set = (k: string, v: string) => setCustomForm(p => ({ ...p, [k]: v }));
-  const filtered = active === "All" ? TOUR_PACKAGES : TOUR_PACKAGES.filter(t => t.category === active);
+  const set = (k: string, v: string) => setCustomForm((p) => ({ ...p, [k]: v }));
+  const filtered =
+    active === "All" ? TOUR_PACKAGES : TOUR_PACKAGES.filter((t) => t.category === active);
 
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     openWhatsApp(
-      `🌟 *VASU CAR TRAVELS – Custom Tour Request*\n\n👤 *Name:* ${customForm.name}\n📞 *Phone:* ${customForm.phone}\n📍 *Destination:* ${customForm.destination}\n👥 *Passengers:* ${customForm.passengers}\n📅 *Date:* ${customForm.date}\n📝 *Details:* ${customForm.message}\n\nPlease suggest a suitable package & pricing. Thank you!`
+      `🌟 *VASU CAR TRAVELS – Custom Tour Package Enquiry*\n\n` +
+        `👤 *Name:* ${customForm.name}\n` +
+        `📞 *Phone:* ${customForm.phone}\n` +
+        `📍 *Destination:* ${customForm.destination}\n` +
+        `👥 *Passengers:* ${customForm.passengers}\n` +
+        `📅 *Travel Date:* ${customForm.date}\n` +
+        `📝 *Special Requests:* ${customForm.message || "None"}\n\n` +
+        `Please share an itinerary and fare quote. Thank you!`
     );
   };
 
-  const inputCls = "w-full px-4 py-3 border border-white/15 bg-white/8 text-white placeholder-white/40 rounded-lg text-sm focus:outline-none focus:border-white/50 focus:bg-white/12 transition-all";
+  const inputCls =
+    "w-full px-4 py-3 border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl text-sm focus:outline-none focus:border-white focus:bg-white/15 transition-all";
 
   return (
-    <div className="animate-fade-up">
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[#071020] to-[#1A2F5E] pt-32 pb-20 text-center">
-        <div className="max-w-7xl mx-auto px-6">
-          <span className="text-xs font-bold tracking-[2px] uppercase text-[#FFB3BE]">Explore</span>
-          <h1 className="font-['Playfair_Display'] text-5xl font-extrabold text-white mt-3 mb-4">Tours & Travel Packages</h1>
-          <p className="text-white/65 text-lg max-w-xl mx-auto leading-relaxed">
-            Carefully curated South India tour packages for families, pilgrims, and corporate groups.
-          </p>
+    <div className="overflow-x-hidden bg-white text-[#0D1B3E]">
+      {/* ── Tours Hero ── */}
+      <section className="relative bg-gradient-to-br from-[#060D1E] via-[#0D1B3E] to-[#16274E] pt-32 pb-20 text-center overflow-hidden">
+        <div className="absolute top-0 right-1/4 w-[500px] h-[300px] bg-[#C8102E]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md mb-4 text-[#FFB3BE] text-xs font-black uppercase tracking-widest"
+          >
+            <Compass size={13} />
+            SOUTH INDIA TOUR PACKAGES
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight uppercase mb-4"
+          >
+            Handcrafted Tours & Pilgrimages
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed"
+          >
+            Tirupati Balaji Darshan, Ooty hill stations, Coorg coffee plantations, Chennai coastal
+            tours, and Shirdi yatra. Safe drivers, clean AC vehicles, zero headache.
+          </motion.p>
         </div>
       </section>
 
-      {/* Filter */}
-      <div className="sticky top-[72px] z-30 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-3.5 flex gap-2 overflow-x-auto scrollbar-none">
-          {TOUR_CATS.map(cat => (
-            <button key={cat} onClick={() => setActive(cat)}
-              className={`px-5 py-2 rounded-full text-sm font-semibold border shrink-0 transition-all cursor-pointer ${
-                active === cat ? "bg-[#0D1B3E] border-[#0D1B3E] text-white" : "bg-white border-gray-200 text-gray-600 hover:border-[#0D1B3E] hover:text-[#0D1B3E]"
-              }`}>
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tour Cards */}
-      <section className="py-14 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-            {filtered.map((tour: TourPackage) => (
-              <article key={tour.id}
-                className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col overflow-hidden">
-                <div className="relative overflow-hidden aspect-[16/10]">
-                  <Image src={tour.image} alt={tour.title} fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw" loading="lazy" />
-                  <span className="absolute top-3 left-3 px-3 py-1 bg-[#C8102E] text-white text-[11px] font-bold rounded-full">
-                    {tour.category}
-                  </span>
-                  <span className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-black/60 text-white text-[11px] font-semibold rounded-full">
-                    <Clock size={11} /> {tour.duration}
-                  </span>
-                </div>
-
-                <div className="p-6 flex flex-col gap-4 flex-1">
-                  <h3 className="text-lg font-bold text-gray-900">{tour.title}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <MapPin size={13} className="text-[#C8102E]" /> {tour.distance}
-                  </div>
-                  <p className="text-sm text-gray-500 leading-relaxed">{tour.description}</p>
-
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Highlights</p>
-                    <ul className="flex flex-col gap-1.5">
-                      {tour.highlights.slice(0, 3).map(h => (
-                        <li key={h} className="flex items-center gap-2 text-sm text-gray-700">
-                          <CheckCircle size={13} className="text-[#C8102E] shrink-0" /> {h}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Available Vehicles</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {tour.vehicleOptions.map(v => (
-                        <span key={v} className="text-[11px] font-semibold px-2.5 py-1 bg-[#0D1B3E]/7 text-[#0D1B3E] rounded-full">{v}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => openWhatsApp(buildTourEnquiry(tour.title, tour.duration))}
-                    className="mt-auto flex items-center justify-center gap-2 py-3 bg-[#25D366] hover:bg-[#1DB954] text-white font-semibold rounded-lg transition-all hover:shadow-lg cursor-pointer">
-                    <MessageCircle size={15} /> Enquire via WhatsApp
-                  </button>
-                </div>
-              </article>
+      {/* ── Category Filter Bar ── */}
+      <div className="sticky top-[68px] z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {TOUR_CATS.map((cat) => (
+              <motion.button
+                key={cat}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setActive(cat)}
+                className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shrink-0 transition-all cursor-pointer ${
+                  active === cat
+                    ? "bg-[#0D1B3E] text-white shadow-md shadow-[#0D1B3E]/20"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60"
+                }`}
+              >
+                {cat}
+              </motion.button>
             ))}
           </div>
         </div>
+      </div>
+
+      {/* ── Tour Packages Cards ── */}
+      <section className="py-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <AnimatePresence>
+              {filtered.map((tour: TourPackage) => (
+                <motion.article
+                  key={tour.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.3 }}
+                  className="group bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden text-left"
+                >
+                  {/* Photo Header */}
+                  <div className="relative overflow-hidden aspect-[16/10] bg-slate-900">
+                    <Image
+                      src={tour.image}
+                      alt={tour.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                      sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
+
+                    <span className="absolute top-3.5 left-3.5 px-3 py-1 bg-[#C8102E] text-white text-[10px] font-black uppercase tracking-wider rounded-md shadow-md">
+                      {tour.category}
+                    </span>
+
+                    <span className="absolute top-3.5 right-3.5 flex items-center gap-1.5 px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold rounded-md">
+                      <Clock size={11} /> {tour.duration}
+                    </span>
+
+                    <div className="absolute bottom-3 left-4 right-4 text-white">
+                      <h3 className="text-xl font-black tracking-tight">{tour.title}</h3>
+                      <p className="text-xs text-white/80 flex items-center gap-1 mt-0.5">
+                        <MapPin size={12} className="text-[#C8102E]" /> {tour.distance}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-6 flex flex-col flex-1">
+                    <p className="text-xs text-slate-600 leading-relaxed mb-5">{tour.description}</p>
+
+                    {/* Highlights */}
+                    <div className="mb-5">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                        Tour Highlights
+                      </p>
+                      <ul className="flex flex-col gap-1.5 text-xs">
+                        {tour.highlights.slice(0, 3).map((h) => (
+                          <li key={h} className="flex items-center gap-2 text-slate-700 font-medium">
+                            <CheckCircle size={13} className="text-[#C8102E] shrink-0" />
+                            <span>{h}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Vehicle Options */}
+                    <div className="mb-6">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                        Suggested Vehicles
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {tour.vehicleOptions.map((v) => (
+                          <span
+                            key={v}
+                            className="text-[10px] font-bold px-2.5 py-1 bg-slate-100 text-[#0D1B3E] rounded-md"
+                          >
+                            {v}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => openWhatsApp(buildTourEnquiry(tour.title, tour.duration))}
+                      className="mt-auto w-full flex items-center justify-center gap-2 py-3 bg-[#C8102E] hover:bg-[#A50D26] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all cursor-pointer"
+                    >
+                      <MessageCircle size={15} /> Enquire on WhatsApp
+                    </motion.button>
+                  </div>
+                </motion.article>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </div>
       </section>
 
-      {/* Custom Package */}
-      <section className="py-20 bg-[#0D1B3E]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Text */}
-            <div>
-              <span className="text-xs font-bold tracking-[2px] uppercase text-[#FFB3BE]">Personalized</span>
-              <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-white mt-3 mb-4">
-                Need a Custom Tour Package?
+      {/* ── Custom Tour Request Section ── */}
+      <section className="py-20 bg-[#0D1B3E] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-5">
+              <span className="text-xs font-black tracking-[2px] uppercase text-[#FFB3BE]">
+                CUSTOM TOUR PACKAGES
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mt-2 mb-5 leading-tight">
+                Plan a Custom Itinerary
               </h2>
-              <p className="text-white/65 leading-relaxed mb-4">
-                Can't find exactly what you're looking for? We'll build a personalized tour package tailored to your destination, group size, budget, and travel dates.
+              <p className="text-sm text-white/75 leading-relaxed mb-6">
+                Need a multi-city South India tour, family wedding convoy, or temple yatra? Tell us
+                your preferred places, group size, and dates. We will curate the route and vehicle.
               </p>
-              <p className="text-white/65 leading-relaxed mb-8">
-                From weekend getaways to extended South India road trips — we plan everything so you can sit back and enjoy.
-              </p>
-              <ul className="flex flex-col gap-3">
-                {["Any destination across South India","Group sizes from 1 to 100+","Budget-friendly to luxury options","Airport pickups & hotel arrangements"].map(i=>(
-                  <li key={i} className="flex items-center gap-3 text-sm text-white/75">
-                    <CheckCircle size={16} className="text-[#25D366] shrink-0" /> {i}
-                  </li>
-                ))}
-              </ul>
+
+              <div className="flex flex-col gap-3 text-xs sm:text-sm text-white/80">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck size={18} className="text-[#C8102E]" />
+                  <span>No rigid time limits – travel at your family's pace</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Calendar size={18} className="text-[#C8102E]" />
+                  <span>Doorstep pickup from Nellore or any South India location</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Clock size={18} className="text-[#C8102E]" />
+                  <span>24/7 dedicated support & route monitoring</span>
+                </div>
+              </div>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleCustomSubmit}
-              className="bg-white/7 border border-white/12 rounded-2xl p-8 flex flex-col gap-5">
-              <p className="text-white font-bold text-lg mb-1">Request a Custom Package</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Your Name</label>
-                  <input required value={customForm.name} onChange={e=>set("name",e.target.value)} placeholder="Full Name" className={inputCls} />
+            {/* Right Form */}
+            <div className="lg:col-span-7">
+              <form
+                onSubmit={handleCustomSubmit}
+                className="bg-white/10 backdrop-blur-md border border-white/15 rounded-3xl p-6 sm:p-9 flex flex-col gap-4 shadow-2xl"
+              >
+                <h3 className="text-lg font-black text-white mb-1">Request Custom Tour Quote</h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                      Your Name *
+                    </label>
+                    <input
+                      required
+                      value={customForm.name}
+                      onChange={(e) => set("name", e.target.value)}
+                      placeholder="Enter full name"
+                      className={inputCls}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                      Phone Number *
+                    </label>
+                    <input
+                      required
+                      type="tel"
+                      value={customForm.phone}
+                      onChange={(e) => set("phone", e.target.value)}
+                      placeholder="+91 XXXXX XXXXX"
+                      className={inputCls}
+                    />
+                  </div>
                 </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Phone</label>
-                  <input required type="tel" value={customForm.phone} onChange={e=>set("phone",e.target.value)} placeholder="+91 XXXXX XXXXX" className={inputCls} />
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                    Destination(s) *
+                  </label>
+                  <input
+                    required
+                    value={customForm.destination}
+                    onChange={(e) => set("destination", e.target.value)}
+                    placeholder="e.g. Ooty - Kodaikanal - Madurai"
+                    className={inputCls}
+                  />
                 </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Destination(s)</label>
-                <input required value={customForm.destination} onChange={e=>set("destination",e.target.value)} placeholder="e.g. Ooty, Kodaikanal" className={inputCls} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                      Passengers *
+                    </label>
+                    <select
+                      value={customForm.passengers}
+                      onChange={(e) => set("passengers", e.target.value)}
+                      className={inputCls + " appearance-none text-slate-900 bg-white"}
+                    >
+                      <option value="1-4 Pax">1 - 4 Passengers (Sedan / MPV)</option>
+                      <option value="5-7 Pax">5 - 7 Passengers (Innova Crysta)</option>
+                      <option value="8-12 Pax">8 - 12 Passengers (Tempo Traveller)</option>
+                      <option value="13-17 Pax">13 - 17 Passengers (Force Urbania)</option>
+                      <option value="18-32 Pax">18 - 32 Passengers (Mini Bus)</option>
+                      <option value="33-50 Pax">33 - 50 Passengers (Tourist Coach)</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                      Travel Date *
+                    </label>
+                    <input
+                      required
+                      type="date"
+                      value={customForm.date}
+                      onChange={(e) => set("date", e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Passengers</label>
-                  <select required value={customForm.passengers} onChange={e=>set("passengers",e.target.value)} className={inputCls + " appearance-none"}>
-                    <option value="">Select</option>
-                    {["1-4","5-7","8-12","13-20","21-45","46+"].map(o=><option key={o}>{o}</option>)}
-                  </select>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                    Additional Requirements (Optional)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={customForm.message}
+                    onChange={(e) => set("message", e.target.value)}
+                    placeholder="Preferred stops, hotel assistance, budget requirements..."
+                    className={inputCls + " resize-none"}
+                  />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Travel Date</label>
-                  <input required type="date" value={customForm.date} onChange={e=>set("date",e.target.value)} className={inputCls} />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-white/60 uppercase tracking-wider">Special Requirements</label>
-                <textarea value={customForm.message} onChange={e=>set("message",e.target.value)}
-                  placeholder="Any special needs, preferred stops, budget range..." rows={3}
-                  className={inputCls + " resize-none"} />
-              </div>
-              <button type="submit"
-                className="flex items-center justify-center gap-2 py-4 bg-[#25D366] hover:bg-[#1DB954] text-white font-bold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-lg cursor-pointer">
-                <MessageCircle size={18} /> Send via WhatsApp
-              </button>
-            </form>
+
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  className="mt-2 flex items-center justify-center gap-2 py-4 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-black uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer"
+                >
+                  <MessageCircle size={18} /> Send Tour Request on WhatsApp
+                </motion.button>
+              </form>
+            </div>
           </div>
         </div>
       </section>
     </div>
   );
 }
-

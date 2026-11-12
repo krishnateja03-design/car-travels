@@ -1,20 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-outfit",
-});
 
 export const viewport: Viewport = {
   themeColor: "#0D1B3E",
@@ -81,7 +68,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`scroll-smooth ${inter.variable} ${outfit.variable}`}>
+    <html lang="en" className="scroll-smooth">
       <body className="antialiased bg-white text-gray-900 font-sans overflow-x-hidden selection:bg-[#C8102E] selection:text-white">
         <Navbar />
         <main id="main-content" className="min-h-screen">

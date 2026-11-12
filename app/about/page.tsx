@@ -2,82 +2,181 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Shield, Clock, Heart, Star, MapPin, Car, CheckCircle, MessageCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Shield,
+  Clock,
+  Heart,
+  Star,
+  MapPin,
+  Car,
+  CheckCircle,
+  MessageCircle,
+  Award,
+  Users,
+  Compass,
+  Sparkles,
+} from "lucide-react";
 import { openWhatsApp } from "@/lib/whatsapp";
 
 const VALUES = [
-  { icon: Shield, title: "Safety First",     desc: "Every vehicle is rigorously inspected before every trip. All drivers are licensed, trained, and background-verified." },
-  { icon: Clock,  title: "Punctuality",      desc: "We understand the value of your time. Our drivers arrive 10 minutes early — every single time." },
-  { icon: Heart,  title: "Customer Care",    desc: "We treat every passenger like family. Your comfort and satisfaction is our highest priority." },
-  { icon: Star,   title: "Excellence",       desc: "From vehicle cleanliness to driver courtesy — we maintain the highest standards across our fleet." },
-  { icon: MapPin, title: "Local Expertise",  desc: "Years of South India operations mean our drivers know every road, shortcut, and safe stop." },
-  { icon: Car,    title: "Modern Fleet",     desc: "Regularly maintained, GPS-tracked vehicles that deliver a smooth, reliable ride every time." },
+  {
+    icon: Shield,
+    title: "Passenger Safety First",
+    desc: "Rigorous mechanical checks, speed governors, clean tyres, and verified chauffeurs ensure your family travels in absolute security.",
+  },
+  {
+    icon: Clock,
+    title: "Punctuality & Reliability",
+    desc: "We understand that flight transfers and temple darshan timings cannot wait. Our vehicles arrive at your doorstep 10 minutes ahead.",
+  },
+  {
+    icon: Heart,
+    title: "Warm Hospitality",
+    desc: "Polite, helpful drivers who understand elderly passengers, family luggage handling, and infant travel needs with utmost care.",
+  },
+  {
+    icon: Star,
+    title: "Spotless Vehicle Hygiene",
+    desc: "Full interior deep cleaning, vacuumed fabric seats, air fresheners, and chilled multi-zone AC for long hot highway drives.",
+  },
+  {
+    icon: MapPin,
+    title: "Deep South India Route Mastery",
+    desc: "From the hairpin ghat bends of Tirumala and Ooty to Hyderabad expressways, our drivers know safe bypasses and clean food stops.",
+  },
+  {
+    icon: Car,
+    title: "Modern, Diverse Fleet",
+    desc: "Whether you need a quick sedan for 3 passengers or a 50-seater bus for marriage transport, we have the ideal fleet ready in Nellore.",
+  },
 ];
 
 const MILESTONES = [
-  { num: "10", unit: "+", label: "Years of Service" },
-  { num: "2000", unit: "+", label: "Happy Customers" },
-  { num: "50", unit: "+", label: "Vehicles in Fleet" },
-  { num: "15", unit: "+", label: "Destinations Covered" },
+  { num: "20+", label: "Years of Trust in Nellore" },
+  { num: "25,000+", label: "Safe Trips Completed" },
+  { num: "100%", label: "Verified AC Vehicles" },
+  { num: "4.9 ★", label: "Customer Satisfaction" },
 ];
 
 export default function AboutPage() {
-  const handleWA = () => openWhatsApp("Hi! I'd like to know more about Vasu Car Travels and your services.");
+  const handleWA = () =>
+    openWhatsApp("Hi! I would like to know more about Vasu Car Travels services.");
 
   return (
-    <div className="animate-fade-up">
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[#071020] to-[#1A2F5E] pt-32 pb-20 text-center">
-        <div className="max-w-7xl mx-auto px-6">
-          <span className="text-xs font-bold tracking-[2px] uppercase text-[#FFB3BE]">About Us</span>
-          <h1 className="font-['Playfair_Display'] text-5xl font-extrabold text-white mt-3 mb-4">About Vasu Car Travels</h1>
-          <p className="text-white/65 text-lg max-w-xl mx-auto leading-relaxed">
-            Nellore's most trusted name in premium car rentals and South India tours since over a decade.
-          </p>
+    <div className="overflow-x-hidden bg-white text-[#0D1B3E]">
+      {/* ── About Hero ── */}
+      <section className="relative bg-gradient-to-br from-[#060D1E] via-[#0D1B3E] to-[#16274E] pt-32 pb-20 text-center overflow-hidden">
+        <div className="absolute top-0 right-1/3 w-[600px] h-[300px] bg-[#C8102E]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md mb-4 text-[#FFB3BE] text-xs font-black uppercase tracking-widest"
+          >
+            <Award size={13} />
+            ESTABLISHED IN NELLORE
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight uppercase mb-4"
+          >
+            About Vasu Car Travels
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed"
+          >
+            Two decades of dedication to safe, reliable, and premium car rental service across
+            Andhra Pradesh, Tamil Nadu, Karnataka, and beyond.
+          </motion.p>
         </div>
       </section>
 
-      {/* Story */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Image */}
-            <div className="relative">
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
-                <Image src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=700&q=80"
-                  alt="Vasu Car Travels fleet" fill className="object-cover"
-                  sizes="(max-width:1024px) 100vw,560px" />
+      {/* ── Story Section with Visual ── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Visual Box */}
+            <div className="lg:col-span-6">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] bg-slate-900 border border-slate-200">
+                <Image
+                  src="/vehicles/fleet-hero.jpg"
+                  alt="Vasu Car Travels Fleet on South India Highway"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width:1024px) 100vw,600px"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/20" />
+                <div className="absolute bottom-6 left-6 right-6 text-white">
+                  <span className="px-3 py-1 bg-[#C8102E] text-white text-[10px] font-black uppercase tracking-wider rounded-md">
+                    Two Decades of Service
+                  </span>
+                  <p className="text-xl font-black mt-2">Serving Families & Businesses in Nellore</p>
+                </div>
               </div>
             </div>
 
-            {/* Text */}
-            <div className="flex flex-col gap-5">
-              <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">Our Story</span>
-              <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-[#0D1B3E] leading-tight">
-                A Decade of Trusted Travel
+            {/* Content */}
+            <div className="lg:col-span-6 flex flex-col gap-5">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-0.5 bg-[#C8102E]" />
+                <span className="text-xs font-black tracking-[2px] uppercase text-[#C8102E]">
+                  OUR STORY
+                </span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-black text-[#0D1B3E] tracking-tight leading-tight">
+                Your Trusted Travel Partner in Nellore & Across South India
               </h2>
-              <div className="w-14 h-1 bg-[#C8102E] rounded" />
-              <p className="text-gray-500 leading-relaxed">
-                VASU CAR TRAVELS was born out of a simple vision — to make quality, reliable transportation accessible to everyone in Nellore and across South India. What started as a small fleet of cars has grown into a comprehensive travel service trusted by thousands.
+
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Founded with a mission to deliver safe, transparent, and dignified travel experiences,
+                <strong> VASU CAR TRAVELS</strong> has grown from a humble family-run service into one
+                of Nellore's most reputed private travel agencies.
               </p>
-              <p className="text-gray-500 leading-relaxed">
-                Over the years, we've helped families reunite at pilgrimage sites, carried corporate executives to important meetings, and guided group tours through the beautiful landscapes of South India. Each journey has shaped us into the company we are today.
+
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Over the years, we have handled thousands of pilgrim visits to Tirumala and Shirdi,
+                corporate transport for industrial hubs in Sri City and Krishnapatnam Port, and wedding
+                shuttles across South India. Our principle remains simple: <em>treat every customer like family</em>.
               </p>
-              <ul className="flex flex-col gap-3">
-                {["Fully licensed and registered travel service","GPS-tracked fleet for transparency","Dedicated customer support team","Partnered with experienced local drivers"].map(item=>(
-                  <li key={item} className="flex items-center gap-3 text-sm font-medium text-gray-700">
-                    <CheckCircle size={16} className="text-[#C8102E] shrink-0" /> {item}
-                  </li>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                {[
+                  "100% Sanitized & AC Vehicles",
+                  "Verified Highway Drivers",
+                  "Fixed Honest Kilometer Rates",
+                  "24/7 Booking & Road Support",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2.5 text-xs font-bold text-[#0D1B3E]">
+                    <CheckCircle size={16} className="text-[#C8102E] shrink-0" />
+                    <span>{item}</span>
+                  </div>
                 ))}
-              </ul>
-              <div className="flex gap-3 flex-wrap mt-2">
-                <button onClick={handleWA}
-                  className="flex items-center gap-2 px-7 py-3.5 bg-[#C8102E] hover:bg-[#A50D26] text-white font-bold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-lg cursor-pointer">
-                  <MessageCircle size={16} /> Get in Touch
-                </button>
-                <Link href="/contact"
-                  className="flex items-center gap-2 px-7 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-lg transition-all">
-                  Book a Trip
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pt-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleWA}
+                  className="px-7 py-3.5 bg-[#C8102E] hover:bg-[#A50D26] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer"
+                >
+                  <MessageCircle size={16} className="inline mr-2" /> Book with Us
+                </motion.button>
+                <Link
+                  href="/vehicles"
+                  className="px-7 py-3.5 bg-slate-100 hover:bg-slate-200 text-[#0D1B3E] text-xs font-bold rounded-xl transition-all"
+                >
+                  Explore Fleet →
                 </Link>
               </div>
             </div>
@@ -85,71 +184,56 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-16 bg-[#0D1B3E]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-            {MILESTONES.map(m => (
-              <div key={m.label} className="py-4">
-                <div className="text-5xl font-extrabold text-white leading-none mb-2">
-                  {m.num}<span className="text-[#C8102E]">{m.unit}</span>
-                </div>
-                <div className="text-sm text-white/55">{m.label}</div>
+      {/* ── Milestones Bar ── */}
+      <section className="py-16 bg-[#0D1B3E] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {MILESTONES.map((m) => (
+              <div key={m.label} className="flex flex-col items-center">
+                <span className="text-4xl sm:text-5xl font-black text-white tracking-tight">
+                  {m.num}
+                </span>
+                <span className="text-xs text-white/70 font-semibold mt-1 uppercase tracking-wider">
+                  {m.label}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Values */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">What We Stand For</span>
-            <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-[#0D1B3E] mt-2 mb-3">Our Core Values</h2>
-            <div className="w-14 h-1 bg-[#C8102E] rounded mx-auto mb-4" />
-            <p className="text-gray-500 max-w-xl mx-auto">These values guide every decision we make and every mile we drive.</p>
+      {/* ── Core Values Grid ── */}
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-xl mx-auto mb-14">
+            <span className="text-xs font-black tracking-[2px] uppercase text-[#C8102E]">
+              WHAT WE STAND FOR
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-[#0D1B3E] tracking-tight mt-1">
+              Our Guiding Principles
+            </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {VALUES.map(({ icon: Icon, title, desc }) => (
-              <div key={title}
-                className="group p-8 border border-gray-100 rounded-xl hover:border-[#0D1B3E] hover:shadow-lg transition-all">
-                <div className="w-14 h-14 bg-[#0D1B3E]/7 group-hover:bg-[#0D1B3E] rounded-2xl flex items-center justify-center mb-5 transition-all">
-                  <Icon size={24} className="text-[#0D1B3E] group-hover:text-white transition-colors" />
-                </div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Mission */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <span className="text-xs font-bold tracking-[2px] uppercase text-[#C8102E]">Our Mission</span>
-          <h2 className="font-['Playfair_Display'] text-4xl font-extrabold text-[#0D1B3E] mt-2 mb-3">Making Every Journey Exceptional</h2>
-          <div className="w-14 h-1 bg-[#C8102E] rounded mx-auto mb-7" />
-          <p className="text-gray-500 text-lg leading-relaxed mb-5">
-            Our mission is to be the most trusted and preferred travel partner for every person who steps into one of our vehicles — through consistent quality, transparent practices, and an unwavering commitment to safety.
-          </p>
-          <p className="text-gray-500 text-lg leading-relaxed mb-10">
-            Whether it's a 10-minute city ride or a week-long South India tour — we bring the same level of professionalism, care, and dedication to every trip.
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <button onClick={handleWA}
-              className="flex items-center gap-2 px-8 py-4 bg-[#C8102E] hover:bg-[#A50D26] text-white font-bold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-lg cursor-pointer">
-              <MessageCircle size={18} /> Book on WhatsApp
-            </button>
-            <Link href="/vehicles"
-              className="flex items-center gap-2 px-8 py-4 bg-[#0D1B3E] hover:bg-[#1A2F5E] text-white font-semibold rounded-lg transition-all">
-              <Car size={18} /> Explore Fleet
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {VALUES.map((v) => {
+              const Icon = v.icon;
+              return (
+                <motion.div
+                  key={v.title}
+                  whileHover={{ y: -5 }}
+                  className="p-8 bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all flex flex-col text-left"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-red-50 text-[#C8102E] flex items-center justify-center mb-6">
+                    <Icon size={26} />
+                  </div>
+                  <h3 className="text-lg font-black text-[#0D1B3E] mb-2">{v.title}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">{v.desc}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
     </div>
   );
 }
-

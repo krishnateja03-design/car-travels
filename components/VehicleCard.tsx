@@ -2,11 +2,23 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Users, Luggage, Wind, Snowflake, MessageCircle, X, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Users,
+  Luggage,
+  Wind,
+  Snowflake,
+  MessageCircle,
+  X,
+  ShieldCheck,
+  Check,
+  ArrowRight,
+  PhoneCall,
+} from "lucide-react";
 import { openWhatsApp, buildVehicleEnquiry } from "@/lib/whatsapp";
 import type { Vehicle } from "@/lib/data";
 
-/* ── Modal ── */
+/* ── Vehicle Detail Modal ── */
 function VehicleModal({ vehicle, onClose }: { vehicle: Vehicle; onClose: () => void }) {
   const [form, setForm] = useState({ pickup: "", drop: "", date: "" });
   const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
@@ -17,187 +29,262 @@ function VehicleModal({ vehicle, onClose }: { vehicle: Vehicle; onClose: () => v
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[2000] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-up"
-      onClick={onClose}
-      role="dialog"
-      aria-modal
-      aria-label={vehicle.name}
-    >
+    <AnimatePresence>
       <div
-        className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-gray-100"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+        onClick={onClose}
+        role="dialog"
+        aria-modal
+        aria-label={vehicle.name}
       >
-        {/* Image */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-t-2xl bg-gray-100">
-          <Image src={vehicle.image} alt={vehicle.name} fill className="object-cover" sizes="(max-width:600px) 100vw,560px" />
-          <span className="absolute top-3 left-3 px-3 py-1 bg-[#0D1B3E] text-white text-xs font-bold rounded-md shadow-sm">
-            {vehicle.category}
-          </span>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.94, y: 20 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-white rounded-3xl max-w-xl w-full my-auto overflow-hidden shadow-2xl border border-gray-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Vehicle Visual Header */}
+          <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
+            <Image
+              src={vehicle.image}
+              alt={vehicle.name}
+              fill
+              className="object-cover"
+              sizes="(max-width:600px) 100vw,600px"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
 
-        {/* Content */}
-        <div className="p-6 sm:p-7">
-          <div className="flex items-start justify-between gap-4 mb-3">
-            <div>
-              <h2 className="text-2xl font-black text-[#0D1B3E]">{vehicle.name}</h2>
-              <p className="text-xs font-semibold text-gray-500 mt-0.5">{vehicle.category}</p>
+            {/* Badges */}
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <span className="px-3.5 py-1 bg-[#0D1B3E]/95 backdrop-blur-md text-white text-[11px] font-black uppercase tracking-wider rounded-lg shadow-md border border-white/10">
+                {vehicle.category}
+              </span>
+              {vehicle.badge && (
+                <span className="px-3 py-1 bg-[#C8102E] text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-md">
+                  {vehicle.badge}
+                </span>
+              )}
             </div>
+
+            {/* Close Button */}
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 hover:bg-black/75 backdrop-blur-md text-white flex items-center justify-center transition-all cursor-pointer"
               aria-label="Close"
             >
-              <X size={18} className="text-gray-600" />
+              <X size={18} />
             </button>
+
+            {/* Bottom Title on Image */}
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{vehicle.name}</h2>
+              {vehicle.ratePerKm && (
+                <p className="text-xs font-bold text-amber-300 mt-0.5">Indicative Fare: {vehicle.ratePerKm}</p>
+              )}
+            </div>
           </div>
 
-          <p className="text-sm text-gray-600 leading-relaxed mb-5">{vehicle.description}</p>
+          {/* Modal Body */}
+          <div className="p-6 sm:p-7">
+            <p className="text-sm text-gray-600 leading-relaxed mb-6">{vehicle.description}</p>
 
-          {/* Key Specs */}
-          <div className="grid grid-cols-3 gap-2.5 mb-5">
-            {[
-              { icon: Users, label: "Capacity", value: `${vehicle.passengers} Seats` },
-              { icon: Luggage, label: "Luggage", value: vehicle.luggage },
-              { icon: Wind, label: "Climate", value: vehicle.ac ? "AC" : "Non-AC" },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl text-center border border-gray-100">
-                <Icon size={17} className="text-[#0D1B3E]" />
-                <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{label}</span>
-                <span className="text-xs font-extrabold text-[#0D1B3E]">{value}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Bullet Feature List */}
-          <div className="mb-6">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Vehicle Highlights</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {vehicle.features.map((f) => (
-                <div key={f} className="flex items-center gap-2 text-xs font-semibold text-[#0D1B3E]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] shrink-0" />
-                  <span>{f}</span>
+            {/* Key Specifications Grid */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                { icon: Users, label: "Passengers", value: `${vehicle.passengers} Seats` },
+                { icon: Luggage, label: "Luggage Space", value: vehicle.luggage },
+                { icon: Wind, label: "Climate Control", value: vehicle.ac ? "Dual AC" : "Standard" },
+              ].map(({ icon: Icon, label, value }) => (
+                <div
+                  key={label}
+                  className="flex flex-col items-center justify-center p-3.5 bg-slate-50 hover:bg-slate-100/80 rounded-2xl text-center border border-slate-100 transition-colors"
+                >
+                  <Icon size={18} className="text-[#0D1B3E] mb-1" />
+                  <span className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">{label}</span>
+                  <span className="text-xs font-black text-[#0D1B3E] mt-0.5">{value}</span>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Quick WhatsApp Form */}
-          <form onSubmit={handleSend} className="border-t border-gray-100 pt-5 flex flex-col gap-3">
-            <p className="text-sm font-extrabold text-[#0D1B3E]">Enquire with Trip Details</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-gray-600">Pickup</label>
-                <input
-                  required
-                  value={form.pickup}
-                  onChange={(e) => set("pickup", e.target.value)}
-                  placeholder="e.g. Nellore"
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C8102E] bg-gray-50 focus:bg-white transition-colors"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-gray-600">Drop</label>
-                <input
-                  required
-                  value={form.drop}
-                  onChange={(e) => set("drop", e.target.value)}
-                  placeholder="e.g. Tirupati"
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C8102E] bg-gray-50 focus:bg-white transition-colors"
-                />
+            {/* Bullet Highlights */}
+            <div className="mb-6">
+              <h4 className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                Key Vehicle Amenities
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {vehicle.features.map((f) => (
+                  <div key={f} className="flex items-center gap-2.5 text-xs font-semibold text-[#0D1B3E]">
+                    <div className="w-5 h-5 rounded-full bg-red-50 text-[#C8102E] flex items-center justify-center shrink-0">
+                      <Check size={12} strokeWidth={3} />
+                    </div>
+                    <span>{f}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-gray-600">Travel Date</label>
-              <input
-                required
-                type="date"
-                value={form.date}
-                onChange={(e) => set("date", e.target.value)}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C8102E] bg-gray-50 focus:bg-white transition-colors"
-              />
-            </div>
-            <button
-              type="submit"
-              className="mt-2 flex items-center justify-center gap-2 py-3 bg-[#C8102E] hover:bg-[#A50D26] text-white font-bold rounded-lg transition-all shadow-md hover:shadow-lg cursor-pointer"
-            >
-              <MessageCircle size={18} />
-              Enquire on WhatsApp
-            </button>
-          </form>
-        </div>
+
+            {/* Direct Instant Booking Form */}
+            <form onSubmit={handleSend} className="border-t border-gray-100 pt-5 flex flex-col gap-3.5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-black uppercase tracking-wider text-[#0D1B3E]">
+                  Check Real-Time Availability
+                </p>
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  Instant Reply
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-bold text-gray-600">Pickup Location</label>
+                  <input
+                    required
+                    value={form.pickup}
+                    onChange={(e) => set("pickup", e.target.value)}
+                    placeholder="e.g. Nellore City"
+                    className="px-3.5 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#C8102E] bg-slate-50 focus:bg-white transition-all"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-bold text-gray-600">Destination</label>
+                  <input
+                    required
+                    value={form.drop}
+                    onChange={(e) => set("drop", e.target.value)}
+                    placeholder="e.g. Tirupati / Chennai"
+                    className="px-3.5 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#C8102E] bg-slate-50 focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-bold text-gray-600">Travel Date</label>
+                <input
+                  required
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => set("date", e.target.value)}
+                  className="px-3.5 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#C8102E] bg-slate-50 focus:bg-white transition-all"
+                />
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                className="mt-2 flex items-center justify-center gap-2 py-3.5 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-bold rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer"
+              >
+                <MessageCircle size={18} />
+                Get Quote on WhatsApp
+              </motion.button>
+            </form>
+          </div>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 }
 
-/* ── Vehicle Card (Exact Reference Design Spec) ── */
+/* ── High-End Vehicle Card ── */
 export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   const [showModal, setShowModal] = useState(false);
 
   return (
     <>
-      <article
-        className="group bg-white rounded-2xl border border-gray-200/90 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col overflow-hidden text-left"
+      <motion.article
+        whileHover={{ y: -6 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="group relative bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden text-left"
         aria-label={vehicle.name}
       >
-        {/* Vehicle Image */}
-        <div className="relative overflow-hidden aspect-[16/11] bg-gray-100">
+        {/* Visual Showcase */}
+        <div className="relative overflow-hidden aspect-[16/11] bg-slate-900">
           <Image
             src={vehicle.image}
             alt={vehicle.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
             loading="lazy"
           />
-          {vehicle.badge && (
-            <span className="absolute top-3 left-3 px-3 py-0.5 bg-[#0D1B3E] text-white text-[10px] font-extrabold uppercase tracking-wide rounded-md shadow-sm">
-              {vehicle.badge}
+
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/20" />
+
+          {/* Category Tag */}
+          <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-1.5">
+            <span className="px-3 py-1 bg-[#0D1B3E]/90 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider rounded-md shadow-sm border border-white/10">
+              {vehicle.category}
             </span>
-          )}
+            {vehicle.badge && (
+              <span className="px-2.5 py-1 bg-[#C8102E] text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-sm">
+                {vehicle.badge}
+              </span>
+            )}
+          </div>
+
+          {/* Climate badge */}
           {vehicle.ac && (
-            <span className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-md shadow-sm">
+            <span className="absolute top-3.5 right-3.5 flex items-center gap-1 px-2.5 py-1 bg-emerald-600/95 backdrop-blur-md text-white text-[10px] font-bold rounded-md shadow-sm">
               <Snowflake size={11} /> AC
             </span>
           )}
+
+          {/* Bottom Title on Image */}
+          <div className="absolute bottom-3 left-4 right-4 text-white">
+            <h3 className="text-xl font-black tracking-tight drop-shadow-sm">{vehicle.name}</h3>
+            {vehicle.ratePerKm && (
+              <p className="text-[11px] font-bold text-amber-300">{vehicle.ratePerKm} (approx)</p>
+            )}
+          </div>
         </div>
 
         {/* Card Body */}
         <div className="p-6 flex flex-col flex-1">
-          <div className="mb-4">
-            <h3 className="text-xl font-black text-[#0D1B3E] tracking-tight">{vehicle.name}</h3>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-0.5">{vehicle.category}</p>
+          {/* Quick Specs Icons Bar */}
+          <div className="grid grid-cols-2 gap-2 pb-4 mb-4 border-b border-slate-100 text-xs">
+            <div className="flex items-center gap-2 text-slate-600">
+              <Users size={15} className="text-[#0D1B3E]" />
+              <span className="font-bold">{vehicle.passengers} Seats</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-600">
+              <Luggage size={15} className="text-[#0D1B3E]" />
+              <span className="font-medium truncate">{vehicle.luggage}</span>
+            </div>
           </div>
 
-          {/* Feature List with dots matching reference */}
-          <ul className="flex flex-col gap-2 mb-6 flex-1 text-xs text-gray-600">
-            {vehicle.features.map((f, i) => (
-              <li key={i} className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] shrink-0" />
-                <span className="font-medium text-gray-700">{f}</span>
+          {/* Feature List (Exact Customer Reference Style) */}
+          <ul className="flex flex-col gap-2 mb-6 flex-1 text-xs text-slate-600">
+            {vehicle.features.slice(0, 4).map((f, i) => (
+              <li key={i} className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] mt-1.5 shrink-0" />
+                <span className="font-semibold text-slate-700 leading-snug">{f}</span>
               </li>
             ))}
           </ul>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-2">
+          {/* Action Row */}
+          <div className="flex items-center gap-2.5 pt-2 mt-auto">
             <button
               onClick={() => setShowModal(true)}
-              className="flex-1 py-2.5 text-xs font-bold border-2 border-[#0D1B3E] text-[#0D1B3E] rounded-lg hover:bg-[#0D1B3E] hover:text-white transition-all cursor-pointer"
+              className="flex-1 py-2.5 text-xs font-bold border-2 border-[#0D1B3E] text-[#0D1B3E] rounded-xl hover:bg-[#0D1B3E] hover:text-white transition-all cursor-pointer text-center"
             >
-              Details
+              View Details
             </button>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               onClick={() => openWhatsApp(buildVehicleEnquiry(vehicle.name, vehicle.category))}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold bg-[#C8102E] hover:bg-[#A50D26] text-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold bg-[#C8102E] hover:bg-[#A50D26] text-white rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
               <MessageCircle size={14} />
               Enquiry Now →
-            </button>
+            </motion.button>
           </div>
         </div>
-      </article>
+      </motion.article>
 
       {showModal && <VehicleModal vehicle={vehicle} onClose={() => setShowModal(false)} />}
     </>
