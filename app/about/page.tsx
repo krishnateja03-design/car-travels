@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { openWhatsApp } from "@/lib/whatsapp";
+import PageHero from "@/components/PageHero";
 
 const VALUES = [
   {
@@ -65,52 +66,31 @@ export default function AboutPage() {
 
   return (
     <div className="overflow-x-hidden bg-white text-[#0D1B3E]">
-      {/* ── About Hero ── */}
-      <section className="relative bg-gradient-to-br from-[#060D1E] via-[#0D1B3E] to-[#16274E] pt-32 pb-20 text-center overflow-hidden">
-        <div className="absolute top-0 right-1/3 w-[600px] h-[300px] bg-[#C8102E]/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md mb-4 text-[#FFB3BE] text-xs font-black uppercase tracking-widest"
-          >
-            <Award size={13} />
-            ESTABLISHED IN NELLORE
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight uppercase mb-4"
-          >
-            About Vasu Car Travels
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed"
-          >
-            Two decades of dedication to safe, reliable, and premium car rental service across
-            Andhra Pradesh, Tamil Nadu, Karnataka, and beyond.
-          </motion.p>
-        </div>
-      </section>
+      <PageHero
+        badge="ESTABLISHED IN NELLORE"
+        badgeIcon={Award}
+        title="About Vasu Car Travels"
+        subtitle="Two decades of dedication to safe, reliable, and premium car rental service across Andhra Pradesh, Tamil Nadu, Karnataka, and beyond."
+      />
 
       {/* ── Story Section with Visual ── */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Visual Box */}
-            <div className="lg:col-span-6">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] bg-slate-900 border border-slate-200">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-6"
+            >
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] bg-slate-900 border border-slate-200 group">
                 <Image
                   src="/vehicles/fleet-hero.jpg"
                   alt="Vasu Car Travels Fleet on South India Highway"
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
                   sizes="(max-width:1024px) 100vw,600px"
                   priority
                 />
@@ -122,10 +102,16 @@ export default function AboutPage() {
                   <p className="text-xl font-black mt-2">Serving Families & Businesses in Nellore</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Content */}
-            <div className="lg:col-span-6 flex flex-col gap-5">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-6 flex flex-col gap-5"
+            >
               <div className="flex items-center gap-2">
                 <span className="w-6 h-0.5 bg-[#C8102E]" />
                 <span className="text-xs font-black tracking-[2px] uppercase text-[#C8102E]">
@@ -179,7 +165,7 @@ export default function AboutPage() {
                   Explore Fleet →
                 </Link>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>

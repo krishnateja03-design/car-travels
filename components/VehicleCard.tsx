@@ -195,9 +195,12 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   return (
     <>
       <motion.article
-        whileHover={{ y: -6 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="group relative bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden text-left"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        whileHover={{ y: -7 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="premium-card group relative bg-white rounded-3xl border border-slate-200/90 shadow-sm flex flex-col overflow-hidden text-left"
         aria-label={vehicle.name}
       >
         {/* Visual Showcase */}

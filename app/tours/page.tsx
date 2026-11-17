@@ -16,8 +16,96 @@ import {
 } from "lucide-react";
 import { openWhatsApp, buildTourEnquiry } from "@/lib/whatsapp";
 import { TOUR_PACKAGES, type TourPackage } from "@/lib/data";
+import PageHero from "@/components/PageHero";
 
 const TOUR_CATS = ["All", "Pilgrimage", "City Tour", "Hill Station", "Nature", "Beach"] as const;
+
+const SOUTH_INDIA_DESTINATIONS = [
+  {
+    name: "Tirupati Temple",
+    state: "Andhra Pradesh",
+    type: "Temple",
+    desc: "Home of Sri Venkateswara Swamy – the most visited pilgrimage site in the world.",
+    image: "/vehicles/tirupati.jpg",
+  },
+  {
+    name: "Meenakshi Temple",
+    state: "Madurai, Tamil Nadu",
+    type: "Temple",
+    desc: "12 majestic gopurams adorned with thousands of vibrant sculptures — a timeless Dravidian marvel.",
+    image: "https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800&q=80",
+  },
+  {
+    name: "Shore Temple",
+    state: "Mahabalipuram, TN",
+    type: "UNESCO Heritage",
+    desc: "7th-century rock-cut UNESCO World Heritage monument perched on the Bay of Bengal coast.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&q=80",
+  },
+  {
+    name: "Hampi Ruins",
+    state: "Karnataka",
+    type: "Heritage",
+    desc: "Surreal boulder-strewn landscape dotted with Vijayanagara Empire temples and stone chariots.",
+    image: "https://images.unsplash.com/photo-1570458436416-b8fcccfe883f?w=800&q=80",
+  },
+  {
+    name: "Kanyakumari",
+    state: "Tamil Nadu",
+    type: "Scenic",
+    desc: "India's southernmost tip — where three oceans meet with sunrise & sunset over the same horizon.",
+    image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800&q=80",
+  },
+  {
+    name: "Munnar Tea Gardens",
+    state: "Kerala",
+    type: "Hill Station",
+    desc: "Endless emerald tea estates carpeting rolling Western Ghats hills at 1600m altitude.",
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80",
+  },
+  {
+    name: "Alleppey Backwaters",
+    state: "Kerala",
+    type: "Backwaters",
+    desc: "Drift through palm-fringed canals on a houseboat — Kerala's most iconic experience.",
+    image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80",
+  },
+  {
+    name: "Brihadeeswara Temple",
+    state: "Thanjavur, TN",
+    type: "Temple",
+    desc: "1000-year-old Chola masterpiece — a 66m vimana built without a single stone foundation shadow.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&q=80",
+  },
+  {
+    name: "Ooty Hill Station",
+    state: "Tamil Nadu",
+    type: "Hill Station",
+    desc: "Queen of the Nilgiris — tea estates, botanical gardens, and misty hairpin ghat roads.",
+    image: "/vehicles/ooty.jpg",
+  },
+  {
+    name: "Coorg Coffee Estates",
+    state: "Karnataka",
+    type: "Nature",
+    desc: "Scotland of India — aromatic coffee plantations, misty valleys, and gushing waterfalls.",
+    image: "/vehicles/coorg.jpg",
+  },
+  {
+    name: "Goa Beaches",
+    state: "Goa",
+    type: "Beach",
+    desc: "Golden beaches, Portuguese-era forts, seafood, and Dudhsagar waterfalls await you.",
+    image: "/vehicles/goa.jpg",
+  },
+  {
+    name: "Srisailam Temple",
+    state: "Andhra Pradesh",
+    type: "Temple",
+    desc: "One of the 12 Jyotirlingas — perched on Nallamala Hills above the Krishna river gorge.",
+    image: "https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&q=80",
+  },
+];
 
 export default function ToursPage() {
   const [active, setActive] = useState("All");
@@ -53,39 +141,12 @@ export default function ToursPage() {
 
   return (
     <div className="overflow-x-hidden bg-white text-[#0D1B3E]">
-      {/* ── Tours Hero ── */}
-      <section className="relative bg-gradient-to-br from-[#060D1E] via-[#0D1B3E] to-[#16274E] pt-32 pb-20 text-center overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-[500px] h-[300px] bg-[#C8102E]/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md mb-4 text-[#FFB3BE] text-xs font-black uppercase tracking-widest"
-          >
-            <Compass size={13} />
-            SOUTH INDIA TOUR PACKAGES
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight uppercase mb-4"
-          >
-            Handcrafted Tours & Pilgrimages
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed"
-          >
-            Tirupati Balaji Darshan, Ooty hill stations, Coorg coffee plantations, Chennai coastal
-            tours, and Shirdi yatra. Safe drivers, clean AC vehicles, zero headache.
-          </motion.p>
-        </div>
-      </section>
+      <PageHero
+        badge="SOUTH INDIA TOUR PACKAGES"
+        badgeIcon={Compass}
+        title="Handcrafted Tours & Pilgrimages"
+        subtitle="Tirupati Balaji Darshan, Ooty hill stations, Coorg coffee plantations, Chennai coastal tours, and Shirdi yatra. Safe drivers, clean AC vehicles, zero headache."
+      />
 
       {/* ── Category Filter Bar ── */}
       <div className="sticky top-[68px] z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm py-4">
@@ -115,7 +176,7 @@ export default function ToursPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence>
-              {filtered.map((tour: TourPackage) => (
+              {filtered.map((tour: TourPackage, i: number) => (
                 <motion.article
                   key={tour.id}
                   layout
@@ -132,6 +193,7 @@ export default function ToursPage() {
                       src={tour.image}
                       alt={tour.title}
                       fill
+                      priority={i < 3}
                       className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                       sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
                     />
@@ -201,6 +263,107 @@ export default function ToursPage() {
                 </motion.article>
               ))}
             </AnimatePresence>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Famous South India Destinations ── */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-50 border border-red-100 mb-4">
+              <Sparkles size={13} className="text-[#C8102E]" />
+              <span className="text-[11px] font-black uppercase tracking-widest text-[#C8102E]">
+                Famous Destinations
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black text-[#0D1B3E] tracking-tight leading-tight">
+              Iconic Places of South India
+            </h2>
+            <p className="text-sm text-gray-500 mt-3 max-w-2xl mx-auto leading-relaxed">
+              From sacred temples to misty hill stations and pristine backwaters — explore South
+              India's most breathtaking destinations with Vasu Car Travels.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {SOUTH_INDIA_DESTINATIONS.map((dest, idx) => (
+              <motion.div
+                key={dest.name}
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.07 }}
+                whileHover={{ y: -8 }}
+                className="group relative rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer aspect-[3/4] bg-slate-900"
+                onClick={() =>
+                  openWhatsApp(
+                    `🌟 *VASU CAR TRAVELS – Tour Enquiry*\n\n📍 *Destination:* ${dest.name}, ${dest.state}\n\nPlease share tour packages and vehicle options for this destination. Thank you!`
+                  )
+                }
+              >
+                <Image
+                  src={dest.image}
+                  alt={dest.name}
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                  sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,(max-width:1280px) 33vw,25vw"
+                />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent" />
+
+                {/* State badge */}
+                <span className="absolute top-3 left-3 px-2.5 py-1 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold rounded-lg">
+                  {dest.state}
+                </span>
+
+                {/* Category badge */}
+                <span className="absolute top-3 right-3 px-2.5 py-1 bg-[#C8102E] text-white text-[10px] font-black rounded-lg">
+                  {dest.type}
+                </span>
+
+                {/* Bottom Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                  <h3 className="text-lg font-black tracking-tight leading-tight">{dest.name}</h3>
+                  <p className="text-[11px] text-white/75 mt-0.5 leading-snug line-clamp-2">
+                    {dest.desc}
+                  </p>
+
+                  {/* Book CTA - shows on hover */}
+                  <div className="mt-3 flex items-center gap-1.5 text-[11px] font-black text-[#FFB3BE] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <MessageCircle size={13} />
+                    <span>Book This Tour →</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Bottom CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mt-14"
+          >
+            <p className="text-sm text-gray-500 mb-4">
+              Don't see your destination? We cover all of South India!
+            </p>
+            <button
+              onClick={() =>
+                openWhatsApp(
+                  "🌟 *VASU CAR TRAVELS – Tour Enquiry*\n\nI would like to plan a South India trip. Please share available packages and pricing."
+                )
+              }
+              className="inline-flex items-center gap-2.5 px-8 py-4 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-black uppercase tracking-wider rounded-2xl shadow-xl hover:shadow-[#C8102E]/30 transition-all cursor-pointer"
+            >
+              <MessageCircle size={18} /> Plan My Custom Tour on WhatsApp
+            </button>
           </motion.div>
         </div>
       </section>

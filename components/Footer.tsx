@@ -1,18 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, MessageCircle, Share2, Globe, Heart } from "lucide-react";
-import { openWhatsApp } from "@/lib/whatsapp";
+import BookingModal from "@/components/BookingModal";
 import { SITE_CONFIG } from "@/lib/config";
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <footer className="bg-[#0D1B3E] text-white">
       {/* ── Main Footer Grid ── */}
-      <div className="max-w-7xl mx-auto px-6 py-16 border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-6 py-10 sm:py-12 border-b border-white/10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 items-start">
           {/* Logo & Description */}
           <div className="flex flex-col gap-5">
@@ -55,7 +57,6 @@ export default function Footer() {
                 ["Home", "/"],
                 ["Our Vehicles", "/vehicles"],
                 ["Tours & Packages", "/tours"],
-                ["Gallery", "/gallery"],
                 ["About Us", "/about"],
                 ["Contact Us", "/contact"],
               ].map(([label, href]) => (
@@ -98,8 +99,8 @@ export default function Footer() {
               Need immediate cab booking or outstation rate quote? Message our dispatch team directly on WhatsApp.
             </p>
             <button
-              onClick={() => openWhatsApp("Hi! I'd like to book a vehicle with Vasu Car Travels.")}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-bold rounded-lg shadow-md transition-all cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-bold rounded-lg shadow-md transition-all cursor-pointer glow-red"
             >
               <MessageCircle size={16} />
               Book on WhatsApp
@@ -119,6 +120,9 @@ export default function Footer() {
           <span>Across India</span>
         </div>
       </div>
+
+      {/* Global Booking Modal */}
+      <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </footer>
   );
 }

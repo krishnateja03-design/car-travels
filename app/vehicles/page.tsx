@@ -129,42 +129,17 @@ function VehiclesContent() {
   );
 }
 
+import PageHero from "@/components/PageHero";
+
 export default function VehiclesPage() {
   return (
     <div className="overflow-x-hidden bg-white text-[#0D1B3E]">
-      {/* Hero Banner */}
-      <section className="relative bg-gradient-to-br from-[#060D1E] via-[#0D1B3E] to-[#16274E] pt-32 pb-20 text-center overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-[#C8102E]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md mb-4 text-[#FFB3BE] text-xs font-black uppercase tracking-widest"
-          >
-            <Sparkles size={13} />
-            VASU CAR TRAVELS FLEET
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight uppercase mb-4"
-          >
-            Premium Vehicles For Every Journey
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed"
-          >
-            From luxurious Force Urbania vans and Innova Crysta MPVs to 50-seater tourist buses and
-            executive airport sedans. Always AC, always verified, always on time.
-          </motion.p>
-        </div>
-      </section>
+      <PageHero
+        badge="VASU CAR TRAVELS FLEET"
+        badgeIcon={Sparkles}
+        title="Premium Vehicles For Every Journey"
+        subtitle="From luxurious Force Urbania vans and Innova Crysta MPVs to 50-seater tourist buses and executive airport sedans. Always AC, always verified, always on time."
+      />
 
       <Suspense
         fallback={

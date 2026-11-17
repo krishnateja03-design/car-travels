@@ -14,23 +14,27 @@ export interface BookingDetails {
 
 /**
  * Triggers WhatsApp redirect with pre-formatted message
+ * Uses api.whatsapp.com for proper emoji UTF-8 decoding
  */
 export function openWhatsApp(message: string): void {
-  const url = `https://wa.me/${SITE_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  const url = `https://api.whatsapp.com/send?phone=${SITE_CONFIG.WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`;
   if (typeof window !== "undefined") {
     window.open(url, "_blank", "noopener,noreferrer");
   }
 }
 
 /**
- * Formats structured booking enquiry for WhatsApp dispatch
+ * Formats structured booking enquiry with genuine emojis, clean formatting, and no website link
  */
 export function buildBookingMessage(b: BookingDetails): string {
   const lines = [
-    `🚗 *${SITE_CONFIG.BUSINESS_NAME} – Trip Booking Enquiry*`,
+    `----------------------------------------`,
+    `🚗 *${SITE_CONFIG.BUSINESS_NAME}*`,
+    `*Trip Booking Enquiry*`,
+    `----------------------------------------`,
     ``,
     `👤 *Customer:* ${b.name}`,
-    b.phone ? `📞 *Phone:* ${b.phone}` : null,
+    b.phone && b.phone !== "Not specified" ? `📞 *Phone:* ${b.phone}` : null,
     `📍 *Pickup:* ${b.pickup}`,
     `🏁 *Destination:* ${b.drop}`,
     `📅 *Travel Date:* ${b.travelDate}`,
@@ -39,10 +43,12 @@ export function buildBookingMessage(b: BookingDetails): string {
     `👥 *Passengers:* ${b.passengers}`,
     b.requirements?.trim() ? `📝 *Special Requests:* ${b.requirements}` : null,
     ``,
-    `_Sent via vasucartravels.com online booking_`,
+    `----------------------------------------`,
+    `_Please share availability & fare quote._`,
+    `_Thank you!_`,
   ].filter(Boolean);
 
-  return lines.join("\n");
+  return (lines as string[]).join("\n");
 }
 
 /**

@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import {
   MessageCircle,
   ChevronRight,
@@ -15,371 +15,518 @@ import {
   Truck,
   Bus,
   Compass,
-  PhoneCall,
-  Calendar,
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  Star,
+  Phone,
+  ChevronDown,
+  Zap,
+  Award,
+  TrendingUp,
 } from "lucide-react";
 import VehicleCard from "@/components/VehicleCard";
-import { openWhatsApp, buildBookingMessage } from "@/lib/whatsapp";
+import BookingModal from "@/components/BookingModal";
 import { VEHICLES } from "@/lib/data";
 
-const WHY_US_BENEFITS = [
+/* ─── Data ─────────────────────────────────────────────── */
+
+const STATS = [
+  { target: 15, suffix: "+", label: "Years of Service", icon: Award },
+  { target: 50, suffix: "K+", label: "Happy Passengers", icon: Users },
+  { target: 100, suffix: "%", label: "Verified Drivers", icon: ShieldCheck },
+  { prefix: "24/7", target: 0, suffix: "", label: "WhatsApp Support", icon: Phone },
+];
+
+function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  useEffect(() => {
+    if (!isInView || target === 0) return;
+    let start = 0;
+    const duration = 1600; // ms
+    const stepTime = 25;
+    const steps = duration / stepTime;
+    const increment = target / steps;
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, stepTime);
+    return () => clearInterval(timer);
+  }, [isInView, target]);
+
+  if (prefix) {
+    return <span ref={ref}>{prefix}</span>;
+  }
+
+  return (
+    <span ref={ref}>
+      {count}
+      {suffix}
+    </span>
+  );
+}
+
+const WHY_US = [
   {
     icon: ShieldCheck,
-    title: "Safe & Reliable Travel",
-    desc: "GPS-enabled fleet, background-verified chauffeurs, and emergency 24/7 roadside assistance.",
+    title: "Safe & Reliable",
+    desc: "GPS-tracked fleet, police-verified chauffeurs, and 24/7 emergency roadside support.",
   },
   {
-    icon: Car,
-    title: "Well Maintained Vehicles",
-    desc: "Rigorous safety inspection before every outstation trip. Chilled dual AC and pristine interiors.",
+    icon: Zap,
+    title: "Instant Confirmation",
+    desc: "Book on WhatsApp and get confirmed in minutes — no long wait times.",
   },
   {
-    icon: Users,
-    title: "Professional Drivers",
-    desc: "Courteous, verified drivers with 10+ years of highway and temple ghat-road mastery.",
+    icon: TrendingUp,
+    title: "Transparent Pricing",
+    desc: "All-inclusive fixed quotes. Zero hidden toll, fuel, or night charges.",
   },
   {
-    icon: Clock,
-    title: "24/7 Dispatch Support",
-    desc: "Round-the-clock booking team ready for emergency airport runs and early morning darshans.",
+    icon: Star,
+    title: "Premium Comfort",
+    desc: "Spotless interiors, chilled dual AC, and reclining seats on every journey.",
   },
 ];
 
 const SERVICE_SOLUTIONS = [
   {
     label: "Car Rentals",
-    sub: "(South India)",
-    desc: "Sedans & SUVs for city, business & airport transfers",
+    sub: "South India",
+    desc: "Sedans & SUVs for airport, city, and business travel",
     icon: Car,
     href: "/vehicles?cat=Sedans",
+    highlight: "Daily & Outstation",
+    color: "from-blue-600 to-blue-800",
   },
   {
     label: "Tempo Traveller",
-    sub: "(All India)",
-    desc: "9 to 17 seater luxury pushback vans for group yatras",
+    sub: "All India",
+    desc: "9–17 seater luxury push-back AC vans for group pilgrimages",
     icon: Truck,
     href: "/vehicles?cat=Tempo%20Travellers",
+    highlight: "Most Popular",
+    color: "from-[#C8102E] to-rose-800",
   },
   {
     label: "Bus Rentals",
-    sub: "(All India)",
-    desc: "Air-suspension luxury coaches for weddings & tours",
+    sub: "All India",
+    desc: "32–50+ seater air-suspension luxury coaches for weddings & tours",
     icon: Bus,
     href: "/vehicles?cat=Buses",
+    highlight: "Corporate & Weddings",
+    color: "from-emerald-600 to-emerald-800",
   },
   {
-    label: "Tours & Packages",
-    sub: "(South India)",
-    desc: "Custom holiday & temple circuits with hotel bookings",
+    label: "Tour Packages",
+    sub: "South India",
+    desc: "Tailored holiday & temple darshan circuits with verified stays",
     icon: Compass,
     href: "/tours",
+    highlight: "Custom Circuits",
+    color: "from-violet-600 to-violet-800",
   },
 ];
 
-const VEHICLE_CATEGORIES_LIST = [
-  "All",
-  "Luxury Vans",
-  "SUVs & MPVs",
-  "Tempo Travellers",
-  "Buses",
-  "Sedans",
+const DESTINATIONS_TICKER = [
+  "Tirupati", "Ooty", "Coorg", "Madurai", "Hampi", "Kanyakumari",
+  "Munnar", "Alleppey", "Goa", "Shirdi", "Mahabalipuram", "Thanjavur",
+  "Bangalore", "Hyderabad", "Chennai", "Pondicherry", "Kodaikanal",
 ];
+
+const VEHICLE_CATEGORIES_LIST = ["All", "Luxury Vans", "SUVs & MPVs", "Tempo Travellers", "Buses", "Sedans"];
+
+/* ─── Page Component ───────────────────────────────────── */
 
 export default function Home() {
   const [selectedCat, setSelectedCat] = useState("All");
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    pickup: "",
-    drop: "",
-    travelDate: "",
-    returnDate: "",
-    vehicleType: "Force Urbania (16/17 Seater)",
-    passengers: "4",
-    requirements: "",
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  const filteredVehicles = selectedCat === "All" ? VEHICLES : VEHICLES.filter((v) => v.category === selectedCat);
+  const displayVehicles = filteredVehicles.slice(0, 3);
+
+  const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 30 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.7, delay, ease: "easeOut" as const },
   });
 
-  const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
-  const handleWA = () =>
-    openWhatsApp("Hi! I would like to book a car with Vasu Car Travels, Nellore.");
-
-  const handleBookingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    openWhatsApp(
-      buildBookingMessage({
-        name: form.name || "Customer",
-        phone: form.phone || "Not specified",
-        pickup: form.pickup,
-        drop: form.drop,
-        travelDate: form.travelDate,
-        returnDate: form.returnDate,
-        vehicleType: form.vehicleType,
-        passengers: form.passengers,
-        requirements: form.requirements,
-      })
-    );
-  };
-
-  const filteredVehicles =
-    selectedCat === "All" ? VEHICLES : VEHICLES.filter((v) => v.category === selectedCat);
-
   return (
-    <div className="bg-white text-[#0D1B3E] overflow-x-hidden">
+    <div className="bg-white text-[#0D1B3E] overflow-x-hidden selection:bg-[#C8102E] selection:text-white">
+
       {/* ══════════════════════════════════════════════════════════
-          1. HERO SECTION (Exact Reference Screen 1)
+          HERO — Full Screen, Cinematic, Premium
       ══════════════════════════════════════════════════════════ */}
-      <section className="relative pt-24 pb-16 md:pt-36 md:pb-24 overflow-hidden bg-gradient-to-br from-[#060D1E] via-[#0D1B3E] to-[#16274E]">
-        {/* Exact Scenic Mountain Road Background from Reference */}
-        <div className="absolute inset-0 opacity-40 mix-blend-overlay">
+      <section ref={heroRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden">
+
+        {/* Parallax Background */}
+        <motion.div style={{ y: heroY }} className="absolute inset-0 z-0">
           <Image
-            src="/vehicles/hero-bg.jpg"
-            alt="Scenic Highway Road Trip Across South India"
+            src="https://images.unsplash.com/photo-1506015391300-4802dc74de2e?w=1920&q=90"
+            alt="Scenic luxury highway travel road trip"
             fill
             priority
-            className="object-cover"
+            className="object-cover object-[center_35%]"
             sizes="100vw"
           />
-        </div>
+          {/* Balanced gradient overlay so the right side vehicle shines through cleanly */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#060D1E]/95 via-[#0D1B3E]/80 to-[#060D1E]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#060D1E] via-transparent to-[#060D1E]/30" />
+        </motion.div>
 
-        {/* Ambient Glows */}
-        <div className="absolute top-1/4 -left-40 w-96 h-96 bg-[#C8102E]/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-0 w-[500px] h-[500px] bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient glows */}
+        <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-[#C8102E]/15 rounded-full blur-[130px] pointer-events-none z-10 animate-pulse-glow" />
+        <div className="absolute bottom-1/3 right-0 w-[400px] h-[400px] bg-blue-700/10 rounded-full blur-[120px] pointer-events-none z-10" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
-            {/* Top Pill */}
-            <motion.div
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md mb-6"
+        {/* Content */}
+        <motion.div style={{ opacity: heroOpacity }} className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 pb-16">
+
+          {/* Top brand badge */}
+          <motion.div {...fadeUp(0)} className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-panel border border-white/15 mb-8">
+            <span className="w-2 h-2 rounded-full bg-[#C8102E] animate-pulse" />
+            <span className="text-[11px] font-black tracking-[3px] uppercase text-white/90">
+              Vasu Car Travels · Nellore · Est. 2010
+            </span>
+          </motion.div>
+
+          {/* Main Headline */}
+          <motion.h1 {...fadeUp(0.1)} className="font-extrabold text-4xl sm:text-6xl lg:text-7xl text-white tracking-tight leading-[1.08] uppercase mb-6 max-w-4xl">
+            Your Journey,{" "}
+            <span className="block text-gradient-red drop-shadow-xl mt-1">
+              Our Priority.
+            </span>
+          </motion.h1>
+
+          {/* Sub-headline */}
+          <motion.p {...fadeUp(0.2)} className="text-base sm:text-lg text-white/80 font-normal mb-10 leading-relaxed max-w-xl">
+            Premium car rentals across South India. Verified chauffeurs, clean AC fleet, and
+            instant WhatsApp booking — your comfort guaranteed.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div {...fadeUp(0.3)} className="flex flex-wrap items-center gap-4">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="group flex items-center gap-3 px-8 py-4 shimmer-button text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-2xl glow-red cursor-pointer transition-all"
             >
-              <span className="w-2 h-2 rounded-full bg-[#C8102E] animate-pulse-dot" />
-              <span className="text-[11px] sm:text-xs font-black tracking-[2px] uppercase text-white/90">
-                VASU CAR TRAVELS – NELLORE
-              </span>
-            </motion.div>
+              <MessageCircle size={20} className="fill-white group-hover:scale-110 transition-transform" />
+              Book on WhatsApp
+            </button>
 
-            {/* Main Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-black text-4xl sm:text-6xl lg:text-7xl text-white tracking-tight leading-[1.06] uppercase mb-5"
+            <Link
+              href="/vehicles"
+              className="flex items-center gap-2.5 px-8 py-4 glass-panel hover:bg-white/15 text-white font-bold text-sm rounded-2xl border border-white/20 transition-all hover:border-white/40 shadow-lg"
             >
-              YOUR JOURNEY, <br />
-              <span className="text-[#C8102E] drop-shadow-sm">OUR PRIORITY</span>
-            </motion.h1>
+              Explore Fleet <ChevronRight size={17} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
 
-            {/* Sub-headline */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg sm:text-2xl text-white/80 font-medium mb-8 leading-relaxed"
+            <Link
+              href="/tours"
+              className="flex items-center gap-2.5 px-8 py-4 bg-white/5 hover:bg-white/10 text-white/90 font-bold text-sm rounded-2xl border border-white/10 hover:border-white/25 transition-all"
             >
-              Premium Car Rentals Across South India
-            </motion.p>
+              <Compass size={17} />
+              View Tours
+            </Link>
+          </motion.div>
 
-            {/* Hero CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-wrap items-center gap-4"
-            >
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleWA}
-                className="flex items-center gap-2 px-8 py-4 bg-[#C8102E] hover:bg-[#A50D26] text-white font-black text-sm uppercase tracking-wider rounded-xl shadow-xl hover:shadow-2xl transition-all cursor-pointer"
+          {/* Trust Badges */}
+          <motion.div {...fadeUp(0.4)} className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8">
+            {[
+              "On-Time Pickup Guarantee",
+              "Zero Hidden Charges",
+              "GPS Tracked Fleet",
+            ].map((t) => (
+              <span
+                key={t}
+                className="flex items-center gap-2 text-xs font-semibold text-white/80 tracking-wide"
               >
-                <MessageCircle size={18} />
-                Book on WhatsApp
-              </motion.button>
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <Link
-                  href="/vehicles"
-                  className="flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-sm rounded-xl border border-white/20 backdrop-blur-md transition-all"
-                >
-                  Explore Vehicles <ChevronRight size={16} />
-                </Link>
-              </motion.div>
-            </motion.div>
-          </div>
+                <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                {t}
+              </span>
+            ))}
+          </motion.div>
 
-          {/* EXACT Visual Showcase Card (Force Urbania + Innova Crysta + Hycross from Reference) */}
+          {/* Stats Counters — Minimalist & Animated */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/15 aspect-[16/8] sm:aspect-[21/9] bg-slate-900"
+            transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 mt-12 max-w-3xl pt-8 border-t border-white/10"
           >
-            <Image
-              src="/vehicles/fleet-hero.jpg"
-              alt="Force Urbania, Innova Crysta & Hycross Luxury Fleet"
-              fill
-              priority
-              className="object-cover"
-              sizes="(max-width:1200px) 100vw,1200px"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex items-end p-6 sm:p-10">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between w-full gap-4 text-white">
-                <div>
-                  <span className="px-3 py-1 bg-[#C8102E] text-white text-[11px] font-black uppercase tracking-wider rounded-md shadow-sm">
-                    Fleet Showcase
-                  </span>
-                  <p className="text-2xl sm:text-3xl font-black mt-2">
-                    Force Urbania • Innova Crysta • Luxury Hycross
-                  </p>
-                  <p className="text-xs sm:text-sm text-white/70 mt-1">
-                    Sanitized, AC Luxury Vans, MPVs, Coaches & Airport Sedans in Nellore
-                  </p>
-                </div>
-                <div className="sm:text-right shrink-0">
-                  <span className="text-xs font-bold text-white/60">Transparent Outstation Pricing</span>
-                  <p className="text-sm font-extrabold text-emerald-400">All-Inclusive Fixed Quotes</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* 4 Feature Badges (Exact from Reference Hero) */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/10">
-            {WHY_US_BENEFITS.map((item, idx) => {
-              const Icon = item.icon;
+            {STATS.map((stat, idx) => {
+              const Icon = stat.icon;
               return (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3.5 p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 backdrop-blur-md transition-colors"
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.55 + idx * 0.1 }}
+                  whileHover={{ y: -4 }}
+                  className="flex flex-col group cursor-default"
                 >
-                  <div className="w-11 h-11 rounded-xl bg-[#C8102E]/20 flex items-center justify-center shrink-0 text-[#C8102E]">
-                    <Icon size={22} />
+                  <div className="flex items-center gap-2 mb-1">
+                    <motion.div
+                      animate={{ scale: [1, 1.15, 1] }}
+                      transition={{ duration: 2.5, repeat: Infinity, delay: idx * 0.4 }}
+                    >
+                      <Icon size={18} className="text-[#FF4B63]" />
+                    </motion.div>
+                    <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                      <AnimatedCounter
+                        target={stat.target}
+                        suffix={stat.suffix}
+                        prefix={stat.prefix}
+                      />
+                    </span>
                   </div>
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-black text-white leading-tight">
-                      {item.title}
-                    </h4>
+                  <div className="text-xs font-medium text-white/60 tracking-wide pl-6">
+                    {stat.label}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          2. COMFORTABLE RIDES / ABOUT SECTION (Exact Reference Screen 1 Bottom)
+          DESTINATIONS TICKER — Luxury Dark Navy Marquee Strip
       ══════════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-slate-50 border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-7">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-6 h-0.5 bg-[#C8102E]" />
-                <span className="text-xs font-black tracking-[2px] uppercase text-[#C8102E]">
-                  ABOUT VASU CAR TRAVELS
-                </span>
+      <div className="bg-[#060D1E] border-y border-white/10 py-3.5 overflow-hidden relative shadow-inner">
+        <div className="animate-ticker flex items-center gap-0 whitespace-nowrap select-none">
+          {[...DESTINATIONS_TICKER, ...DESTINATIONS_TICKER].map((dest, i) => (
+            <span key={i} className="inline-flex items-center gap-3 px-6 text-xs sm:text-sm font-bold text-white/80 uppercase tracking-widest hover:text-white transition-colors">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] shrink-0" />
+              {dest}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════
+          ABOUT / WHY VASU — Split premium layout
+      ══════════════════════════════════════════════════════════ */}
+      <section className="py-12 sm:py-14 bg-white relative overflow-hidden">
+        {/* Decorative background element */}
+        <div className="absolute -right-32 top-0 bottom-0 w-96 bg-slate-50 rounded-l-[80px] hidden lg:block" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+
+            {/* Left — text */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-8 h-0.5 bg-[#C8102E]" />
+                  <span className="text-xs font-black tracking-[2.5px] uppercase text-[#C8102E]">About Vasu Car Travels</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0D1B3E] tracking-tight leading-tight mb-4">
+                  Comfortable Rides.{" "}
+                  <span className="text-[#C8102E]">Unforgettable Journeys.</span>
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-6">
+                  Based in Nellore, Vasu Car Travels has been the trusted choice for South India car
+                  rentals since 2010. We serve families, corporates, pilgrims, and tourists with
+                  premium vehicles, transparent pricing, and professional chauffeurs.
+                </p>
+
+                {/* Why Us grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                  {WHY_US.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div
+                        key={item.title}
+                        className="flex gap-3 p-3.5 rounded-xl bg-slate-50 hover:bg-red-50/50 border border-slate-200/70 hover:border-red-100 transition-all group"
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-white group-hover:bg-[#C8102E] border border-slate-200 flex items-center justify-center shrink-0 shadow-xs transition-all">
+                          <Icon size={16} className="text-[#C8102E] group-hover:text-white transition-colors" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-bold text-[#0D1B3E] mb-0.5">{item.title}</h4>
+                          <p className="text-[11px] text-gray-500 leading-relaxed">{item.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <h2 className="text-3xl sm:text-5xl font-black text-[#0D1B3E] tracking-tight leading-tight mb-6">
-                Comfortable Rides. <br />
-                <span className="text-[#C8102E]">Unforgettable Journeys.</span>
-              </h2>
-              <p className="text-base text-gray-600 leading-relaxed mb-6">
-                VASU CAR TRAVELS, based in Nellore, offers premium car and van rentals across South India
-                and tempo travellers & buses across India. Whether it's a family pilgrimage to Tirupati,
-                corporate airport shuttle, wedding convoy or an extended group tour — we make your
-                journey smooth, safe, and memorable.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#C8102E] hover:bg-[#A50D26] text-white text-xs sm:text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all glow-red cursor-pointer"
+                >
+                  <MessageCircle size={16} /> Book on WhatsApp
+                </button>
                 <Link
                   href="/about"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-bold rounded-xl shadow-md transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#0D1B3E] hover:bg-[#1a2f5e] text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm hover:shadow-md transition-all glow-navy"
                 >
-                  Know More →
+                  Our Story <ArrowRight size={14} />
                 </Link>
-                <button
-                  onClick={handleWA}
-                  className="inline-flex items-center gap-2 px-7 py-3.5 bg-white hover:bg-gray-100 text-[#0D1B3E] text-sm font-bold rounded-xl border border-gray-300 shadow-xs transition-all cursor-pointer"
-                >
-                  <MessageCircle size={17} className="text-[#25D366]" /> Chat on WhatsApp
-                </button>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Right Card with EXACT "Explore South India" Photo from Reference Screen 1 */}
-            <div className="lg:col-span-5">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] group bg-slate-900 border border-slate-200">
-                <Image
-                  src="/vehicles/explore-south-india.jpg"
-                  alt="Explore South India Tours with Vasu Car Travels"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  sizes="(max-width:1024px) 100vw,500px"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex items-end p-8">
-                  <div>
-                    <span className="px-3 py-1 bg-[#C8102E] text-white text-[10px] font-black uppercase tracking-wider rounded-md shadow-sm">
-                      Speciality Tours
-                    </span>
-                    <h3 className="text-3xl font-black text-white mt-2 tracking-tight">
-                      Explore South India
-                    </h3>
-                    <p className="text-xs sm:text-sm text-white/80 mt-1">
-                      Nellore • Tirupati • Chennai • Bangalore • Hyderabad • Ooty • Coorg • Goa
-                    </p>
+            {/* Right — Human-designed 3-card layered travel collage */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="flex flex-col justify-between"
+            >
+              <div className="grid grid-cols-2 gap-3.5">
+                {/* Main Hero Card — Innova */}
+                <div className="col-span-2 relative h-56 sm:h-64 rounded-2xl overflow-hidden shadow-md border border-slate-200/90 group">
+                  <Image
+                    src="/vehicles/innova-crysta.jpg"
+                    alt="Innova Crysta Travel Fleet"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width:1024px) 100vw, 600px"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute top-3 left-3 bg-[#C8102E] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                    Most Popular
+                  </div>
+                  <div className="absolute bottom-3 left-3.5 right-3.5 text-white">
+                    <p className="text-base sm:text-lg font-bold leading-tight">Toyota Innova Crysta & Hycross</p>
+                    <p className="text-[11px] text-white/80 mt-0.5">Ideal for family outstation & Tirupati pilgrimages</p>
+                  </div>
+                </div>
+
+                {/* Left Mini Card — Urbania */}
+                <div className="relative h-36 sm:h-40 rounded-2xl overflow-hidden shadow-sm border border-slate-200/90 group">
+                  <Image
+                    src="/vehicles/force-urbania.jpg"
+                    alt="Force Urbania Group Luxury Van"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="300px"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-2.5 left-3 right-3 text-white">
+                    <p className="text-xs font-bold leading-tight">Force Urbania</p>
+                    <p className="text-[10px] text-white/80">17 Seater Luxury Van</p>
+                  </div>
+                </div>
+
+                {/* Right Mini Card — Tirupati */}
+                <div className="relative h-36 sm:h-40 rounded-2xl overflow-hidden shadow-sm border border-slate-200/90 group">
+                  <Image
+                    src="/vehicles/tirupati.jpg"
+                    alt="Tirupati Temple Darshan Trips"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="300px"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-2.5 left-3 right-3 text-white">
+                    <p className="text-xs font-bold leading-tight">Tirupati Darshan</p>
+                    <p className="text-[10px] text-white/80">Daily from Nellore</p>
                   </div>
                 </div>
               </div>
-            </div>
+
+              {/* Bottom Trust Strip */}
+              <div className="mt-3.5 p-3 bg-slate-50 border border-slate-200/90 rounded-xl flex items-center justify-between text-xs text-slate-700">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="font-semibold text-[11px] sm:text-xs">Vehicles Ready in Nellore</span>
+                </div>
+                <span className="font-bold text-[#C8102E] text-[11px] sm:text-xs">24/7 Available</span>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          3. TRAVEL SOLUTIONS FOR EVERY NEED (Reference Screen 1 Bottom Icons)
+          SERVICES — Premium dark card grid
       ══════════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-14">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="w-6 h-0.5 bg-[#C8102E]" />
-              <span className="text-xs font-black tracking-[2px] uppercase text-[#C8102E]">
-                OUR SERVICES
-              </span>
-              <span className="w-6 h-0.5 bg-[#C8102E]" />
+      <section className="py-12 sm:py-14 bg-[#060D1E] relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-5"
+          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "40px 40px" }}
+        />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full border border-white/10 bg-white/5">
+              <Sparkles size={12} className="text-[#C8102E]" />
+              <span className="text-[11px] font-black tracking-[3px] uppercase text-white/70">Our Services</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-[#0D1B3E] tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
               Travel Solutions for Every Need
             </h2>
-          </div>
+            <p className="text-sm text-white/50 mt-3 max-w-xl mx-auto">
+              From compact city sedans to 50+ passenger luxury coaches — reliable, premium journeys every time.
+            </p>
+          </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {SERVICE_SOLUTIONS.map((s, idx) => {
               const Icon = s.icon;
               return (
-                <Link
+                <motion.div
                   key={idx}
-                  href={s.href}
-                  className="group flex flex-col items-center justify-center p-8 bg-slate-50 hover:bg-[#0D1B3E] border border-slate-200/80 hover:border-[#0D1B3E] rounded-3xl transition-all duration-300 text-center shadow-xs hover:shadow-2xl hover:-translate-y-1.5"
+                  initial={{ opacity: 0, y: 25 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-white group-hover:bg-[#C8102E] flex items-center justify-center shadow-md mb-5 transition-colors">
-                    <Icon
-                      size={30}
-                      className="text-[#0D1B3E] group-hover:text-white transition-colors"
-                    />
-                  </div>
-                  <h3 className="text-lg font-black text-[#0D1B3E] group-hover:text-white transition-colors">
-                    {s.label}
-                  </h3>
-                  <span className="text-xs font-black text-[#C8102E] group-hover:text-amber-300 transition-colors mt-0.5">
-                    {s.sub}
-                  </span>
-                  <p className="text-xs text-gray-500 group-hover:text-white/70 transition-colors mt-2 leading-relaxed">
-                    {s.desc}
-                  </p>
-                </Link>
+                  <Link
+                    href={s.href}
+                    className="premium-card group relative flex flex-col p-7 h-full bg-white/5 hover:bg-white/10 border border-white/8 hover:border-white/20 rounded-3xl transition-all duration-300 shadow-lg overflow-hidden"
+                  >
+                    {/* Gradient accent top */}
+                    <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${s.color}`} />
+
+                    <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-white/10 text-white/60 uppercase tracking-widest self-start mb-5">
+                      {s.highlight}
+                    </span>
+
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform`}>
+                      <Icon size={26} className="text-white" />
+                    </div>
+
+                    <h3 className="text-lg font-black text-white mb-1">{s.label}</h3>
+                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-3">{s.sub}</span>
+                    <p className="text-xs text-white/55 leading-relaxed flex-1">{s.desc}</p>
+
+                    <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#C8102E] group-hover:gap-2.5 transition-all">
+                      <span>Explore</span>
+                      <ArrowRight size={13} />
+                    </div>
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
@@ -387,324 +534,134 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          4. PREMIUM VEHICLES FOR EVERY JOURNEY (Exact Reference Middle Screen)
+          FLEET PREVIEW — Top 3 vehicles + View More
       ══════════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-slate-50 border-t border-b border-slate-200/80">
+      <section className="py-12 sm:py-14 bg-slate-50 relative">
+        <div className="absolute top-0 left-0 right-0 h-px section-divider" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-6 h-0.5 bg-[#C8102E]" />
-                <span className="text-xs font-black tracking-[2px] uppercase text-[#C8102E]">
-                  OUR FLEET
-                </span>
+
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="inline-flex items-center gap-2 mb-3">
+                <span className="w-8 h-0.5 bg-[#C8102E]" />
+                <span className="text-xs font-black tracking-[2.5px] uppercase text-[#C8102E]">Our Fleet</span>
+                <span className="w-8 h-0.5 bg-[#C8102E]" />
               </div>
               <h2 className="text-3xl sm:text-5xl font-black text-[#0D1B3E] tracking-tight">
                 Premium Vehicles for Every Journey
               </h2>
-              <p className="text-sm text-gray-500 mt-2 max-w-xl">
-                Well-maintained, comfortable, and reliable vehicles for your travel needs in Nellore
-                and across South India.
+              <p className="text-sm text-gray-500 mt-3 max-w-xl mx-auto leading-relaxed">
+                Well-maintained, sanitized, and comfortable vehicles ready for your next South India adventure.
               </p>
-            </div>
-
-            {/* Category Selector Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-              {VEHICLE_CATEGORIES_LIST.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCat(cat)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedCat === cat
-                      ? "bg-[#0D1B3E] text-white shadow-md"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+            </motion.div>
           </div>
 
-          {/* Vehicle Cards Grid - 6 EXACT Photos Cropped from Reference Middle Screen */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredVehicles.slice(0, 6).map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {displayVehicles.map((vehicle, i) => (
+              <motion.div
+                key={vehicle.id}
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+              >
+                <VehicleCard vehicle={vehicle} />
+              </motion.div>
             ))}
           </div>
 
-          <div className="mt-14 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-8 sm:mt-10 text-center"
+          >
             <Link
               href="/vehicles"
-              className="inline-flex items-center gap-2 px-9 py-4 bg-[#0D1B3E] hover:bg-[#1A2F5E] text-white text-sm font-black uppercase tracking-wider rounded-2xl shadow-xl hover:shadow-2xl transition-all cursor-pointer"
+              className="inline-flex items-center gap-2.5 px-10 py-4 bg-[#0D1B3E] hover:bg-[#1a2f5e] text-white text-sm font-black uppercase tracking-wider rounded-2xl shadow-xl hover:shadow-2xl transition-all glow-navy"
             >
-              View Full Fleet (All Categories) →
+              View Full Fleet ({VEHICLES.length} Vehicles) →
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          5. PLAN YOUR JOURNEY & BOOKING ENQUIRY (Exact Reference Right Screen)
+          CTA BANNER — Full bleed, premium dark
       ══════════════════════════════════════════════════════════ */}
-      <section className="py-20 bg-white" id="booking-section">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-6 h-0.5 bg-[#C8102E]" />
-              <span className="text-xs font-black tracking-[2px] uppercase text-[#C8102E]">
-                GET IN TOUCH
-              </span>
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-[#0D1B3E] tracking-tight">
-              Plan Your Journey
+      <section className="relative py-12 sm:py-14 overflow-hidden bg-[#060D1E]">
+        {/* Background image with overlay */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80"
+            alt="South India road trip"
+            fill
+            className="object-cover object-center opacity-25"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#060D1E]/90 via-[#0D1B3E]/80 to-[#060D1E]/90" />
+        </div>
+
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-5"
+          style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }}
+        />
+
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <span className="inline-block px-4 py-1.5 bg-[#C8102E] text-white text-[11px] font-black uppercase tracking-widest rounded-lg shadow-lg mb-6">
+              Instant Confirmation
+            </span>
+            <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-tight mb-6">
+              Ready to Plan Your{" "}
+              <span className="text-gradient-red">Next Journey?</span>
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Tell us your travel details and we'll get back to you with the best vehicle and quote.
+            <p className="text-base sm:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed mb-10">
+              Book directly on WhatsApp for instant quotes. Customized trip plans, professional
+              chauffeurs, and competitive outstation rates across South India.
             </p>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            {/* Left: Booking Form (Exact matching Reference Right Screen) */}
-            <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-9">
-              <div className="flex items-center gap-3 pb-5 border-b border-gray-100 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-[#C8102E] flex items-center justify-center text-white shadow-md">
-                  <PhoneCall size={20} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-[#0D1B3E]">Booking Enquiry</h3>
-                  <p className="text-xs text-gray-500">Fast confirmation via WhatsApp directly to owner</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleBookingSubmit} className="flex flex-col gap-4 text-left">
-                {/* Name */}
-                <div>
-                  <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5">
-                    Name *
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => set("name", e.target.value)}
-                    placeholder="Enter your name"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-all"
-                  />
-                </div>
-
-                {/* Pickup & Destination */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5">
-                      Pickup Location *
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      value={form.pickup}
-                      onChange={(e) => set("pickup", e.target.value)}
-                      placeholder="Enter pickup location"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5">
-                      Destination *
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      value={form.drop}
-                      onChange={(e) => set("drop", e.target.value)}
-                      placeholder="Enter destination"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Travel Date & Return Date */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5">
-                      Travel Date *
-                    </label>
-                    <input
-                      required
-                      type="date"
-                      value={form.travelDate}
-                      onChange={(e) => set("travelDate", e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5">
-                      Return Date (Optional)
-                    </label>
-                    <input
-                      type="date"
-                      value={form.returnDate}
-                      onChange={(e) => set("returnDate", e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Vehicle Required & Passengers */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5">
-                      Vehicle Required *
-                    </label>
-                    <select
-                      value={form.vehicleType}
-                      onChange={(e) => set("vehicleType", e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-all"
-                    >
-                      <option value="Force Urbania">Force Urbania</option>
-                      <option value="Innova Crysta">Innova Crysta</option>
-                      <option value="Innova Hycross">Innova Hycross</option>
-                      <option value="Tempo Traveller">Tempo Traveller</option>
-                      <option value="Tourist Bus">Tourist Bus</option>
-                      <option value="Other Cars (Sedans / SUVs)">Other Cars (Sedans / SUVs)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-1.5">
-                      Number of Passengers *
-                    </label>
-                    <select
-                      value={form.passengers}
-                      onChange={(e) => set("passengers", e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-gray-800 focus:bg-white focus:outline-none focus:border-[#C8102E] transition-all"
-                    >
-                      <option value="1-4 Passengers">1 - 4 Passengers</option>
-                      <option value="5-7 Passengers">5 - 7 Passengers</option>
-                      <option value="8-12 Passengers">8 - 12 Passengers</option>
-                      <option value="13-17 Passengers">13 - 17 Passengers</option>
-                      <option value="18-32 Passengers">18 - 32 Passengers</option>
-                      <option value="33-50+ Passengers">33 - 50+ Passengers</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Submit button directly to WhatsApp */}
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  className="mt-3 w-full flex items-center justify-center gap-2 py-4 bg-[#C8102E] hover:bg-[#A50D26] text-white text-base font-black uppercase tracking-wider rounded-xl shadow-xl hover:shadow-2xl transition-all cursor-pointer"
-                >
-                  <MessageCircle size={20} />
-                  Book on WhatsApp
-                </motion.button>
-                <p className="text-center text-xs text-gray-400 font-semibold mt-1">
-                  We'll get back to you shortly on WhatsApp with instant availability and fare quotes.
-                </p>
-              </form>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-3 px-10 py-4.5 shimmer-button text-white font-black text-base uppercase tracking-wider rounded-2xl shadow-2xl glow-red cursor-pointer"
+              >
+                <MessageCircle size={22} className="fill-white" />
+                Book on WhatsApp
+              </motion.button>
+              <Link
+                href="/contact"
+                className="flex items-center gap-2.5 px-10 py-4.5 glass-panel hover:bg-white/15 text-white font-bold text-base rounded-2xl border border-white/20 backdrop-blur-md transition-all hover:border-white/40"
+              >
+                Contact Us <ChevronRight size={18} />
+              </Link>
             </div>
 
-            {/* Right: Why Choose Us & Scenic Photo (Exact from Customer Reference Screen 3) */}
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              {/* Navy Blue Card */}
-              <div className="bg-[#0D1B3E] text-white rounded-3xl p-8 shadow-2xl border border-slate-800">
-                <h3 className="text-2xl font-black mb-6">Why Choose Us?</h3>
-                <div className="flex flex-col gap-5 text-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                      <Car size={22} className="text-[#C8102E]" />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-white text-base">Wide Range of Vehicles</h4>
-                      <p className="text-xs text-white/60 mt-0.5 leading-relaxed">
-                        Cars, Tempo Travellers, Buses
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                      <ShieldCheck size={22} className="text-[#C8102E]" />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-white text-base">Well Maintained Fleet</h4>
-                      <p className="text-xs text-white/60 mt-0.5 leading-relaxed">
-                        Clean, Safe & Comfortable
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                      <Users size={22} className="text-[#C8102E]" />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-white text-base">Experienced Drivers</h4>
-                      <p className="text-xs text-white/60 mt-0.5 leading-relaxed">
-                        Professional & Verified
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                      <Calendar size={22} className="text-[#C8102E]" />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-white text-base">Flexible Booking</h4>
-                      <p className="text-xs text-white/60 mt-0.5 leading-relaxed">
-                        Easy & Hassle Free
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* EXACT Scenic Highway Photo from Customer Reference Screen 3 */}
-              <div className="relative rounded-3xl overflow-hidden aspect-[16/10] shadow-2xl group border border-slate-200">
-                <Image
-                  src="/vehicles/scenic-road.jpg"
-                  alt="Scenic highway travel"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  sizes="(max-width:1024px) 100vw,500px"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B3E] via-[#0D1B3E]/30 to-transparent flex items-end p-8">
-                  <div>
-                    <p className="font-serif italic text-white/95 text-2xl font-black">
-                      Your Journey, <br />
-                      <span className="text-[#C8102E] font-sans not-italic font-black text-xl">
-                        Our Priority
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
+            {/* Service area pill */}
+            <div className="mt-10 inline-flex items-center gap-2 px-5 py-2.5 glass-panel rounded-full border border-white/10">
+              <MapPin size={14} className="text-[#C8102E] shrink-0" />
+              <p className="text-xs font-bold text-white/60">
+                Tamil Nadu · Kerala · Karnataka · Andhra Pradesh · Telangana · All India (Buses & Tempo)
+              </p>
             </div>
-          </div>
-
-          {/* Service Area Bar (Exact from Reference Bottom) */}
-          <div className="mt-14 p-7 bg-slate-50 border border-slate-200 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center shrink-0">
-                <MapPin size={24} className="text-[#C8102E]" />
-              </div>
-              <div>
-                <span className="text-[11px] font-black uppercase tracking-wider text-gray-400">
-                  Our Service Area
-                </span>
-                <p className="text-base sm:text-lg font-black text-[#0D1B3E]">
-                  South India Car Rentals <span className="text-gray-300 mx-2">|</span> Tempo & Bus
-                  Rentals Across India
-                </p>
-              </div>
-            </div>
-            <p className="text-xs font-bold text-gray-500">
-              Tamil Nadu • Kerala • Karnataka • Andhra Pradesh • Telangana • And More...
-            </p>
-          </div>
+          </motion.div>
         </div>
       </section>
+
+      {/* Global Booking Modal */}
+      <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

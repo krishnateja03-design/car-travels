@@ -68,7 +68,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body className="antialiased bg-white text-gray-900 font-sans overflow-x-hidden selection:bg-[#C8102E] selection:text-white">
         <Navbar />
         <main id="main-content" className="min-h-screen">
