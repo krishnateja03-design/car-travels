@@ -69,6 +69,7 @@ export default function Navbar() {
                 alt="VASU CAR TRAVELS - Nellore"
                 fill
                 priority
+                loading="eager"
                 className="object-contain object-left group-hover:opacity-95 transition-opacity"
                 sizes="210px"
               />

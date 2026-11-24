@@ -285,9 +285,9 @@ export default function BookingModal({ isOpen, onClose, defaultVehicle }: Bookin
                     >
                       <option value="Force Urbania (16/17 Seater)">Force Urbania (16/17 Seater)</option>
                       <option value="Innova Crysta (7/8 Seater)">Innova Crysta (7/8 Seater)</option>
-                      <option value="Innova Hycross (7 Seater Hybrid)">Innova Hycross (7 Seater Hybrid)</option>
-                      <option value="Force Tempo Traveller (12/17 Seater)">Force Tempo Traveller (12/17 Seater)</option>
-                      <option value="Luxury Tourist Bus (32/40/50 Seater)">Luxury Tourist Bus (32/40/50 Seater)</option>
+                      <option value="Innova Hycross (8 Seater Hybrid)">Innova Hycross (8 Seater Hybrid)</option>
+                      <option value="Hyundai Venue (5 Seater SUV)">Hyundai Venue (5 Seater SUV)</option>
+                      <option value="Luxury Bus (28+1 Seater)">Luxury Bus (28+1 Seater)</option>
                       <option value="Sedans (Swift Dzire / Etios)">Sedans (Swift Dzire / Etios)</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-gray-400">

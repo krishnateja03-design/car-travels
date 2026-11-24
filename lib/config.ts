@@ -16,7 +16,7 @@ export const SITE_CONFIG = {
   WHATSAPP_NUMBER: "919346460138",
 
   PHONE: "+91 9346460138",
-  EMAIL: "vasucartravels@gmail.com",
+  EMAIL: "vasucartravels.nellore@gmail.com",
   ADDRESS: "Nellore, Andhra Pradesh – 524001",
 
   COVERAGE_REGIONS: [

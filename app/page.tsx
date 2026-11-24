@@ -108,18 +108,18 @@ const SERVICE_SOLUTIONS = [
     color: "from-blue-600 to-blue-800",
   },
   {
-    label: "Tempo Traveller",
-    sub: "All India",
-    desc: "9–17 seater luxury push-back AC vans for group pilgrimages",
+    label: "SUV & MPV Fleet",
+    sub: "South India",
+    desc: "Hyundai Venue, Innova Crysta & 8-Seater Hycross for premium family trips",
     icon: Truck,
-    href: "/vehicles?cat=Tempo%20Travellers",
+    href: "/vehicles?cat=SUVs%20%26%20MPVs",
     highlight: "Most Popular",
     color: "from-[#C8102E] to-rose-800",
   },
   {
     label: "Bus Rentals",
     sub: "All India",
-    desc: "32–50+ seater air-suspension luxury coaches for weddings & tours",
+    desc: "28+1 seater air-suspension luxury coaches for weddings, events & tours",
     icon: Bus,
     href: "/vehicles?cat=Buses",
     highlight: "Corporate & Weddings",
@@ -653,7 +653,7 @@ export default function Home() {
             <div className="mt-10 inline-flex items-center gap-2 px-5 py-2.5 glass-panel rounded-full border border-white/10">
               <MapPin size={14} className="text-[#C8102E] shrink-0" />
               <p className="text-xs font-bold text-white/60">
-                Tamil Nadu · Kerala · Karnataka · Andhra Pradesh · Telangana · All India (Buses & Tempo)
+                Tamil Nadu · Kerala · Karnataka · Andhra Pradesh · Telangana · All India (Buses & Luxury Vans)
               </p>
             </div>
           </motion.div>

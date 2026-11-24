@@ -221,14 +221,13 @@ export default function ContactPage() {
                       >
                         <option value="Force Urbania (16/17 Seater)">Force Urbania (16/17 Seater)</option>
                         <option value="Innova Crysta (7/8 Seater)">Innova Crysta (7/8 Seater)</option>
-                        <option value="Innova Hycross (7 Seater Luxury)">
-                          Innova Hycross (7 Seater Luxury)
+                        <option value="Innova Hycross (8 Seater Luxury)">
+                          Innova Hycross (8 Seater Luxury)
                         </option>
-                        <option value="Tempo Traveller (12/17 Seater)">
-                          Tempo Traveller (12/17 Seater)
+                        <option value="Hyundai Venue (5 Seater SUV)">
+                          Hyundai Venue (5 Seater SUV)
                         </option>
-                        <option value="Tourist Bus (40/50 Seater)">Tourist Bus (40/50 Seater)</option>
-                        <option value="Toyota Fortuner (4x4 SUV)">Toyota Fortuner (4x4 SUV)</option>
+                        <option value="Tourist Bus (28+1 Seater)">Tourist Bus (28+1 Seater)</option>
                         <option value="Executive Sedan (Etios / Dzire)">
                           Executive Sedan (Etios / Dzire)
                         </option>

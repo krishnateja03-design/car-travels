@@ -138,7 +138,7 @@ export default function VehiclesPage() {
         badge="VASU CAR TRAVELS FLEET"
         badgeIcon={Sparkles}
         title="Premium Vehicles For Every Journey"
-        subtitle="From luxurious Force Urbania vans and Innova Crysta MPVs to 50-seater tourist buses and executive airport sedans. Always AC, always verified, always on time."
+        subtitle="From luxurious Force Urbania vans and Innova Crysta/Hycross MPVs to 28+1 seater tourist buses, Hyundai Venue SUVs, and executive airport sedans. Always AC, always verified, always on time."
       />
 
       <Suspense

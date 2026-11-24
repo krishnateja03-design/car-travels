@@ -126,13 +126,13 @@ export default function ToursPage() {
     e.preventDefault();
     openWhatsApp(
       `🌟 *VASU CAR TRAVELS – Custom Tour Package Enquiry*\n\n` +
-        `👤 *Name:* ${customForm.name}\n` +
-        `📞 *Phone:* ${customForm.phone}\n` +
-        `📍 *Destination:* ${customForm.destination}\n` +
-        `👥 *Passengers:* ${customForm.passengers}\n` +
-        `📅 *Travel Date:* ${customForm.date}\n` +
-        `📝 *Special Requests:* ${customForm.message || "None"}\n\n` +
-        `Please share an itinerary and fare quote. Thank you!`
+      `👤 *Name:* ${customForm.name}\n` +
+      `📞 *Phone:* ${customForm.phone}\n` +
+      `📍 *Destination:* ${customForm.destination}\n` +
+      `👥 *Passengers:* ${customForm.passengers}\n` +
+      `📅 *Travel Date:* ${customForm.date}\n` +
+      `📝 *Special Requests:* ${customForm.message || "None"}\n\n` +
+      `Please share an itinerary and fare quote. Thank you!`
     );
   };
 
@@ -158,11 +158,10 @@ export default function ToursPage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActive(cat)}
-                className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shrink-0 transition-all cursor-pointer ${
-                  active === cat
+                className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shrink-0 transition-all cursor-pointer ${active === cat
                     ? "bg-[#0D1B3E] text-white shadow-md shadow-[#0D1B3E]/20"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60"
-                }`}
+                  }`}
               >
                 {cat}
               </motion.button>
@@ -461,11 +460,10 @@ export default function ToursPage() {
                       className={inputCls + " appearance-none text-slate-900 bg-white"}
                     >
                       <option value="1-4 Pax">1 - 4 Passengers (Sedan / MPV)</option>
-                      <option value="5-7 Pax">5 - 7 Passengers (Innova Crysta)</option>
-                      <option value="8-12 Pax">8 - 12 Passengers (Tempo Traveller)</option>
+                      <option value="5 Pax">5 Passengers (Hyundai Venue)</option>
+                      <option value="7-8 Pax">7 - 8 Passengers (Innova Crysta / Hycross)</option>
                       <option value="13-17 Pax">13 - 17 Passengers (Force Urbania)</option>
-                      <option value="18-32 Pax">18 - 32 Passengers (Mini Bus)</option>
-                      <option value="33-50 Pax">33 - 50 Passengers (Tourist Coach)</option>
+                      <option value="28+1 Pax">28 + 1 Passengers (Luxury Bus)</option>
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5">
