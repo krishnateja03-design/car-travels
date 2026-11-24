@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import VehicleCard from "@/components/VehicleCard";
 import BookingModal from "@/components/BookingModal";
+import SplitTextReveal from "@/components/SplitTextReveal";
 import { VEHICLES } from "@/lib/data";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -158,10 +159,15 @@ export default function Home() {
   const filteredVehicles = selectedCat === "All" ? VEHICLES : VEHICLES.filter((v) => v.category === selectedCat);
   const displayVehicles = filteredVehicles.slice(0, 3);
 
-  const fadeUp = (delay = 0) => ({
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.7, delay, ease: "easeOut" as const },
+  // Cinematic staggered entrance easing
+  const cinematicReveal = (delay = 0) => ({
+    initial: { opacity: 0, y: 32, filter: "blur(6px)" },
+    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    transition: {
+      duration: 0.9,
+      delay,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
   });
 
   return (
@@ -171,7 +177,6 @@ export default function Home() {
           HERO — Full Screen, Cinematic, Premium
       ══════════════════════════════════════════════════════════ */}
       <section ref={heroRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden">
-
         {/* Parallax Background */}
         <motion.div style={{ y: heroY }} className="absolute inset-0 z-0">
           <Image
@@ -195,32 +200,35 @@ export default function Home() {
         <motion.div style={{ opacity: heroOpacity }} className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 pb-16">
 
           {/* Top brand badge */}
-          <motion.div {...fadeUp(0)} className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-panel border border-white/15 mb-8">
-            <span className="w-2 h-2 rounded-full bg-[#C8102E] animate-pulse" />
-            <span className="text-[11px] font-black tracking-[3px] uppercase text-white/90">
+          <motion.div {...cinematicReveal(0)} className="inline-flex items-center gap-2.5 px-4.5 py-2 rounded-full glass-panel border border-white/20 mb-8 backdrop-blur-xl shadow-lg">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C8102E] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#C8102E]" />
+            </span>
+            <span className="text-[11px] font-black tracking-[3px] uppercase text-white/95">
               Vasu Car Travels · Nellore · Est. 2010
             </span>
           </motion.div>
 
-          {/* Main Headline */}
-          <motion.h1 {...fadeUp(0.1)} className="font-extrabold text-4xl sm:text-6xl lg:text-7xl text-white tracking-tight leading-[1.08] uppercase mb-6 max-w-4xl">
-            Your Journey,{" "}
-            <span className="block text-gradient-red drop-shadow-xl mt-1">
-              Our Priority.
+          {/* Main Headline with Split Character / Word Spring Reveal */}
+          <h1 className="font-extrabold text-4xl sm:text-6xl lg:text-7xl text-white tracking-tight leading-[1.08] uppercase mb-6 max-w-4xl drop-shadow-2xl">
+            <SplitTextReveal text="Your Journey," delay={0.1} />{" "}
+            <span className="block text-gradient-red drop-shadow-[0_10px_20px_rgba(200,16,46,0.35)] mt-1">
+              <SplitTextReveal text="Our Priority." delay={0.35} />
             </span>
-          </motion.h1>
+          </h1>
 
           {/* Sub-headline */}
-          <motion.p {...fadeUp(0.2)} className="text-base sm:text-lg text-white/80 font-normal mb-10 leading-relaxed max-w-xl">
+          <motion.p {...cinematicReveal(0.24)} className="text-base sm:text-lg text-white/85 font-normal mb-10 leading-relaxed max-w-xl text-balance">
             Premium car rentals across South India. Verified chauffeurs, clean AC fleet, and
             instant WhatsApp booking — your comfort guaranteed.
           </motion.p>
 
           {/* CTA Buttons */}
-          <motion.div {...fadeUp(0.3)} className="flex flex-wrap items-center gap-4">
+          <motion.div {...cinematicReveal(0.36)} className="flex flex-wrap items-center gap-4">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="group flex items-center gap-3 px-8 py-4 shimmer-button text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-2xl glow-red cursor-pointer transition-all"
+              className="group relative overflow-hidden flex items-center gap-3 px-8 py-4 shimmer-button text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-2xl glow-red cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <MessageCircle size={20} className="fill-white group-hover:scale-110 transition-transform" />
               Book on WhatsApp
@@ -228,22 +236,14 @@ export default function Home() {
 
             <Link
               href="/vehicles"
-              className="flex items-center gap-2.5 px-8 py-4 glass-panel hover:bg-white/15 text-white font-bold text-sm rounded-2xl border border-white/20 transition-all hover:border-white/40 shadow-lg"
+              className="flex items-center gap-2.5 px-8 py-4 glass-panel hover:bg-white/15 text-white font-bold text-sm rounded-2xl border border-white/20 transition-all hover:border-white/40 shadow-lg hover:scale-[1.02] active:scale-[0.98]"
             >
               Explore Fleet <ChevronRight size={17} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-
-            <Link
-              href="/tours"
-              className="flex items-center gap-2.5 px-8 py-4 bg-white/5 hover:bg-white/10 text-white/90 font-bold text-sm rounded-2xl border border-white/10 hover:border-white/25 transition-all"
-            >
-              <Compass size={17} />
-              View Tours
             </Link>
           </motion.div>
 
           {/* Trust Badges */}
-          <motion.div {...fadeUp(0.4)} className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8">
+          <motion.div {...cinematicReveal(0.48)} className="flex flex-wrap items-center gap-4 sm:gap-6 mt-8">
             {[
               "On-Time Pickup Guarantee",
               "Zero Hidden Charges",
@@ -500,29 +500,29 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  whileHover={{ y: -8, scale: 1.02 }}
+                  whileHover={{ y: -6 }}
                 >
                   <Link
                     href={s.href}
-                    className="premium-card group relative flex flex-col p-7 h-full bg-white/5 hover:bg-white/10 border border-white/8 hover:border-white/20 rounded-3xl transition-all duration-300 shadow-lg overflow-hidden"
+                    className="group relative flex flex-col p-7 h-full bg-[#0D1B3E]/80 hover:bg-[#12234e] border border-white/10 hover:border-white/25 rounded-3xl transition-all duration-300 shadow-xl overflow-hidden"
                   >
-                    {/* Gradient accent top */}
-                    <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${s.color}`} />
+                    {/* Top accent bar */}
+                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${s.color}`} />
 
-                    <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-white/10 text-white/60 uppercase tracking-widest self-start mb-5">
+                    <span className="text-[10px] font-black px-3 py-1 rounded-full bg-white/10 text-white/80 uppercase tracking-widest self-start mb-5 border border-white/10">
                       {s.highlight}
                     </span>
 
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform`}>
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-105 transition-transform`}>
                       <Icon size={26} className="text-white" />
                     </div>
 
                     <h3 className="text-lg font-black text-white mb-1">{s.label}</h3>
-                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-3">{s.sub}</span>
-                    <p className="text-xs text-white/55 leading-relaxed flex-1">{s.desc}</p>
+                    <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider mb-3">{s.sub}</span>
+                    <p className="text-xs text-white/70 leading-relaxed flex-1">{s.desc}</p>
 
-                    <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#C8102E] group-hover:gap-2.5 transition-all">
-                      <span>Explore</span>
+                    <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#FF4B63] group-hover:gap-2.5 transition-all">
+                      <span>Explore Fleet</span>
                       <ArrowRight size={13} />
                     </div>
                   </Link>

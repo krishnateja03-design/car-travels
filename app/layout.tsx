@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 
 export const viewport: Viewport = {
   themeColor: "#0D1B3E",
@@ -70,11 +71,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body className="antialiased bg-white text-gray-900 font-sans overflow-x-hidden selection:bg-[#C8102E] selection:text-white">
-        <Navbar />
-        <main id="main-content" className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
+        <SmoothScrollProvider>
+          <Navbar />
+          <main id="main-content" className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+        </SmoothScrollProvider>
       </body>
     </html>
   );

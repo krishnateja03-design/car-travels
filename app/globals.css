@@ -26,6 +26,31 @@
     backface-visibility: hidden;
   }
 
+  /* Luxury Gold & Red Shimmer Keyframes */
+  @keyframes luxury-reveal {
+    0% {
+      opacity: 0;
+      transform: translateY(28px) scale(0.98);
+      filter: blur(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0px);
+    }
+  }
+
+  @keyframes ambient-glow {
+    0%, 100% {
+      opacity: 0.35;
+      transform: scale(1) translate(0px, 0px);
+    }
+    50% {
+      opacity: 0.65;
+      transform: scale(1.08) translate(15px, -10px);
+    }
+  }
+
   /* Premium Slim Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: #060D1E; }
@@ -119,22 +144,6 @@
   position: relative;
   overflow: hidden;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
-}
-.premium-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-  transform: skewX(-25deg);
-  transition: left 0.75s ease-in-out;
-  pointer-events: none;
-  z-index: 10;
-}
-.premium-card:hover::before {
-  left: 200%;
 }
 .premium-card:hover {
   transform: translateY(-6px);
