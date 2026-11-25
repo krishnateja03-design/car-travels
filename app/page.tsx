@@ -28,6 +28,7 @@ import {
 import VehicleCard from "@/components/VehicleCard";
 import BookingModal from "@/components/BookingModal";
 import SplitTextReveal from "@/components/SplitTextReveal";
+import { usePreloaderReady } from "@/components/PreloaderContext";
 import { VEHICLES } from "@/lib/data";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -106,7 +107,9 @@ const SERVICE_SOLUTIONS = [
     icon: Car,
     href: "/vehicles?cat=Sedans",
     highlight: "Daily & Outstation",
-    color: "from-blue-600 to-blue-800",
+    color: "from-[#C8102E] to-[#8B0000]",
+    glow: "rgba(200,16,46,0.22)",
+    bar: "#C8102E",
   },
   {
     label: "SUV & MPV Fleet",
@@ -115,7 +118,9 @@ const SERVICE_SOLUTIONS = [
     icon: Truck,
     href: "/vehicles?cat=SUVs%20%26%20MPVs",
     highlight: "Most Popular",
-    color: "from-[#C8102E] to-rose-800",
+    color: "from-[#1a56db] to-[#1e3a8a]",
+    glow: "rgba(26,86,219,0.2)",
+    bar: "#1a56db",
   },
   {
     label: "Bus Rentals",
@@ -124,7 +129,9 @@ const SERVICE_SOLUTIONS = [
     icon: Bus,
     href: "/vehicles?cat=Buses",
     highlight: "Corporate & Weddings",
-    color: "from-emerald-600 to-emerald-800",
+    color: "from-[#D4A843] to-[#b8882e]",
+    glow: "rgba(212,168,67,0.2)",
+    bar: "#D4A843",
   },
   {
     label: "Tour Packages",
@@ -133,7 +140,9 @@ const SERVICE_SOLUTIONS = [
     icon: Compass,
     href: "/tours",
     highlight: "Custom Circuits",
-    color: "from-violet-600 to-violet-800",
+    color: "from-[#059669] to-[#065f46]",
+    glow: "rgba(5,150,105,0.2)",
+    bar: "#059669",
   },
 ];
 
@@ -151,6 +160,7 @@ export default function Home() {
   const [selectedCat, setSelectedCat] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const ready = usePreloaderReady();
 
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
@@ -159,10 +169,10 @@ export default function Home() {
   const filteredVehicles = selectedCat === "All" ? VEHICLES : VEHICLES.filter((v) => v.category === selectedCat);
   const displayVehicles = filteredVehicles.slice(0, 3);
 
-  // Cinematic staggered entrance easing
+  // Cinematic staggered entrance easing — only fires after preloader clears
   const cinematicReveal = (delay = 0) => ({
     initial: { opacity: 0, y: 32, filter: "blur(6px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    animate: ready ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 32, filter: "blur(6px)" },
     transition: {
       duration: 0.9,
       delay,
@@ -198,7 +208,6 @@ export default function Home() {
 
         {/* Content */}
         <motion.div style={{ opacity: heroOpacity }} className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 pb-16">
-
           {/* Top brand badge */}
           <motion.div {...cinematicReveal(0)} className="inline-flex items-center gap-2.5 px-4.5 py-2 rounded-full glass-panel border border-white/20 mb-8 backdrop-blur-xl shadow-lg">
             <span className="relative flex h-2.5 w-2.5">
@@ -262,7 +271,7 @@ export default function Home() {
           {/* Stats Counters — Minimalist & Animated */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
             className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 mt-12 max-w-3xl pt-8 border-t border-white/10"
           >
@@ -500,30 +509,35 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  whileHover={{ y: -6 }}
+                  whileHover={{ y: -6, transition: { duration: 0.3, ease: [0.16,1,0.3,1] } }}
                 >
                   <Link
                     href={s.href}
-                    className="group relative flex flex-col p-7 h-full bg-[#0D1B3E]/80 hover:bg-[#12234e] border border-white/10 hover:border-white/25 rounded-3xl transition-all duration-300 shadow-xl overflow-hidden"
+                    className="group relative flex flex-col p-7 h-full bg-[#0D1B3E]/80 hover:bg-[#0f1f42] border border-white/8 hover:border-[#C8102E]/40 rounded-3xl transition-all duration-300 shadow-xl overflow-hidden service-card"
+                    style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
                   >
                     {/* Top accent bar */}
-                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${s.color}`} />
+                    <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${s.color}`} />
 
-                    <span className="text-[10px] font-black px-3 py-1 rounded-full bg-white/10 text-white/80 uppercase tracking-widest self-start mb-5 border border-white/10">
+                    {/* Hover glow overlay */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-3xl"
+                      style={{ background: `radial-gradient(circle at 50% 0%, ${s.glow} 0%, transparent 60%)` }} />
+
+                    <span className="text-[10px] font-black px-3 py-1 rounded-full bg-white/8 text-white/70 uppercase tracking-widest self-start mb-5 border border-white/8">
                       {s.highlight}
                     </span>
 
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-105 transition-transform`}>
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-105 group-hover:shadow-2xl transition-all duration-300`}>
                       <Icon size={26} className="text-white" />
                     </div>
 
                     <h3 className="text-lg font-black text-white mb-1">{s.label}</h3>
-                    <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider mb-3">{s.sub}</span>
-                    <p className="text-xs text-white/70 leading-relaxed flex-1">{s.desc}</p>
+                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-3">{s.sub}</span>
+                    <p className="text-xs text-white/60 leading-relaxed flex-1">{s.desc}</p>
 
-                    <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#FF4B63] group-hover:gap-2.5 transition-all">
-                      <span>Explore Fleet</span>
-                      <ArrowRight size={13} />
+                    <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#FF4B63] group-hover:gap-2.5 transition-all duration-300">
+                      <span>Explore</span>
+                      <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </Link>
                 </motion.div>
